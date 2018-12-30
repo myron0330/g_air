@@ -37,6 +37,9 @@ def load_trading_days(start=None, end=None):
     Args:
         start(string): start time
         end(string): end time
+
+    Returns:
+        list of datetime.datetime: trading days list
     """
     with get_connection().cursor() as cursor:
         sql = """select distinct 日期 from price"""
