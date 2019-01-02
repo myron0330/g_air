@@ -46,12 +46,13 @@ def load_trading_days(start=None, end=None):
         if start or end:
             where_clause = """where """
             if start and not end:
-                where_clause += """日期 >= {}""".format(normalize_date(start).strftime('%Y-%m-%d'))
+                where_clause += """日期 >= '{}'""".format(normalize_date(start).strftime('%Y-%m-%d %H:%M:%S'))
             if not start and end:
-                where_clause += """日期 <= {}""".format(normalize_date(end).strftime('%Y-%m-%d'))
+                where_clause += """日期 <= '{}'""".format(normalize_date(end).strftime('%Y-%m-%d %H:%M:%S'))
             if start and end:
-                where_clause += """日期 >= {} and 日期 <= {}""".format(
-                    normalize_date(start).strftime('%Y-%m-%d'), normalize_date(end).strftime('%Y-%m-%d'))
+                where_clause += """日期 >= '{}' and 日期 <= '{}'""".format(
+                    normalize_date(start).strftime('%Y-%m-%d %H:%M:%S'),
+                    normalize_date(end).strftime('%Y-%m-%d %H:%M:%S'))
             sql = ' '.join([sql, where_clause])
         cursor.execute(sql)
         result = sorted(map(lambda x: normalize_date(x[0]), cursor.fetchall()))
