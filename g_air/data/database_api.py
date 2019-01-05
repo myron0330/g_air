@@ -59,7 +59,7 @@ def load_trading_days(start=None, end=None):
     return result
 
 
-def load_attribute(symbols, trading_days, attribute=None):
+def load_attribute(symbols=None, trading_days=None, attribute=None):
     """
     Load attribute data from database.
 
@@ -87,8 +87,9 @@ def load_attribute(symbols, trading_days, attribute=None):
         trading_days_str_list = trading_days or list()
         trading_days_condition = """substr(日期, 1, 10) in {}""".format(
             tuple(trading_days_str_list)) if trading_days_str_list else """"""
+        joiner = ' and ' if symbol_condition and trading_days_condition else ''
         if symbol_condition or trading_days_condition:
-            where_clause = ' and '.join([symbol_condition, trading_days_condition])
+            where_clause = joiner.join([symbol_condition, trading_days_condition])
         if where_clause:
             sql = ' where '.join([sql, where_clause])
         cursor.execute(sql)
@@ -98,7 +99,7 @@ def load_attribute(symbols, trading_days, attribute=None):
     return frame
 
 
-def load_attributes_data(symbols, trading_days, attributes=None):
+def load_attributes_data(symbols=None, trading_days=None, attributes=None):
     """
     Load attribute data from database.
 

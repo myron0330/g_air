@@ -12,6 +12,7 @@ from g_air.data.database_api import (
     load_attribute,
     load_attributes_data
 )
+from g_air.utils.decorator import time_consumption
 
 
 class TestDatabaseAPI(TestCase):
@@ -40,8 +41,9 @@ class TestDatabaseAPI(TestCase):
         symbols = ['000001.SZ', '600000.SH']
         trading_days = load_trading_days(start='20181201', end='20190101')
         attribute = 'scdh1'
-        data = load_attribute(symbols, trading_days, attribute=attribute)
-        assert data
+        data = time_consumption(load_attribute)(
+            symbols=symbols, trading_days=trading_days, attribute=attribute)
+        assert not data.empty
 
     def test_load_attributes_list(self):
         """
@@ -50,4 +52,5 @@ class TestDatabaseAPI(TestCase):
         symbols = ['000001.SZ', '600000.SH']
         trading_days = load_trading_days(start='20181201', end='20190101')
         data = load_attributes_data(symbols, trading_days)
+        # data_all = load_attributes_data(trading_days=trading_days)
         assert data
