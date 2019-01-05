@@ -5,6 +5,7 @@
 #   Author: Myron
 # **********************************************************************************#
 """
+import bisect
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from .api_base import (
@@ -17,11 +18,12 @@ from ..const import (
 from ..utils.exceptions import Exceptions
 from ..utils.datetime import normalize_date
 from ..utils.decorator import time_consumption
+from ..const import MAX_PERIODS
 
 
 def load_all_symbols():
     """
-    Load all symbols from price table.
+    Load all symbols from cadd table.
     """
     with get_connection().cursor() as cursor:
         sql = """select distinct 代码 from price"""
@@ -32,7 +34,7 @@ def load_all_symbols():
 
 def load_trading_days(start=None, end=None):
     """
-    Load trading days from price table.
+    Load trading days from cadd table.
 
     Args:
         start(string): start time
@@ -42,7 +44,7 @@ def load_trading_days(start=None, end=None):
         list of datetime.datetime: trading days list
     """
     with get_connection().cursor() as cursor:
-        sql = """select distinct 日期 from price"""
+        sql = """select distinct 日期 from cadd"""
         where_clause = """"""
         if start or end:
             if start and not end:
@@ -57,6 +59,24 @@ def load_trading_days(start=None, end=None):
             sql = ' where '.join([sql, where_clause])
         cursor.execute(sql)
         result = sorted(map(lambda x: x[0].split(' ')[0], cursor.fetchall()))
+    return result
+
+
+def load_trading_days_with_history_periods(date, history_periods=MAX_PERIODS):
+    """
+    Load trading days with history periods.
+
+    Args:
+        date(string): date, %Y-%m-%d
+        history_periods(int): periods length
+
+    Returns:
+        list: list of date
+    """
+    all_trading_days = load_trading_days()
+    index = bisect.bisect_right(all_trading_days, date)
+    start_index = max(index - history_periods - 1, 0)
+    result = all_trading_days[start_index:index]
     return result
 
 
@@ -86,8 +106,8 @@ def load_attribute(symbols=None, trading_days=None, attribute=None):
         where_clause = """"""
         symbol_condition = """代码 in {}""".format(tuple(symbols)) if symbols else """"""
         trading_days_str_list = trading_days or list()
-        trading_days_condition = """substr(日期, 1, 10) in {}""".format(
-            tuple(trading_days_str_list)) if trading_days_str_list else """"""
+        trading_days_condition = """substr(日期, 1, 10) in ({})""".format(
+            ','.join(map(lambda x: '\"{}\"'.format(x), trading_days_str_list))) if trading_days_str_list else """"""
         joiner = ' and ' if symbol_condition and trading_days_condition else ''
         if symbol_condition or trading_days_condition:
             where_clause = joiner.join([symbol_condition, trading_days_condition])
@@ -121,5 +141,5 @@ def load_attributes_data(symbols=None, trading_days=None, attributes=None):
     if responses:
         for frame in responses:
             attribute = frame.columns[-1]
-            result[attribute] = frame.pivot(index='date', columns='symbol', values=attribute)
+            result[attribute] = frame.pivot(index='date', columns='symbol', values=attribute).reindex(trading_days)
     return result
