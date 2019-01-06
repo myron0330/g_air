@@ -246,7 +246,7 @@ def calculate_signal_w2(ws_series=None, ws_series_offset_5=None, **cal_args):
     """
     Calculate signal W2(n).
 
-    3.2)        Ws(n) > Ws(n-5) --> 1;       Ws(n) < Ws(n-20) --> -1;      Ws(n) == Ws(n-20) --> 0
+    3.2)        Ws(n) > Ws(n-5) --> 1;       Ws(n) < Ws(n-5) --> -1;      Ws(n) == Ws(n-5) --> 0
 
     Args:
         ws_series(Series): signal Ws(n) series.
@@ -293,8 +293,8 @@ def calculate_signal_w4(w_series=None, w_series_offset_5=None, **cal_args):
     3.4)        W(n) > W(n-5) --> 1;       W(n) < W(n-5) --> -1;      W(n) == W(n-5) --> 0
 
     Args:
-        w_series(Series): signal W(n) series.
-        w_series_offset_5(Series): signal W(n-5) series.
+        w_series(Series): factor W(n) series.
+        w_series_offset_5(Series): factor W(n-5) series.
         **cal_args(**dict): factor calculating arguments, including: symbols, target_date, data.
 
     Returns:
@@ -308,6 +308,125 @@ def calculate_signal_w4(w_series=None, w_series_offset_5=None, **cal_args):
     return (w_series - w_series_offset_5).apply(np.sign)
 
 
+def calculate_signal_d1(ds_series=None, **cal_args):
+    """
+    Calculate signal D1(n)
+
+    3.1)        Ds(n) > 5 --> -3;   4 < Ds(n) <= 5 --> -2;   3 < Ds(n) <= 4 --> -1;
+                Ds(n) <= -9 --> 5;   -9 < Ds(n) <= -8 --> 4;  -8 < Ds(n) <= -7 --> 3;
+                -7 < Ds(n) <= -6 --> 2;  -6 < Ds(n) <= -5 --> 1
+
+                else: 0
+
+    Args:
+        ds_series(Series): signal Ds(n) series.
+        **cal_args(**dict): factor calculating arguments, including: symbols, target_date, data.
+
+    Returns:
+        Series: signal D1(n) series.
+    """
+
+    def _grade(signal):
+        """
+        Grade a specific signal value.
+
+        Args:
+            signal: signal value.
+
+        Returns:
+            int: score of signal deserved.
+        """
+        score = 0
+        if signal > 5:
+            score = -3
+        if 4 < signal <= 5:
+            score = -2
+        if 3 < signal <= 4:
+            score = -1
+        if signal <= -9:
+            score = 5
+        if -9 < signal <= -8:
+            score = 4
+        if -8 < signal <= -7:
+            score = 3
+        if -7 < signal <= -6:
+            score = 2
+        if -6 < signal <= -5:
+            score = 1
+        return score
+
+    if ds_series is None:
+        ds_series = calculate_signal_d(**cal_args)
+    return ds_series.apply(_grade)
+
+
+def calculate_signal_d2(ds_series=None, ds_series_offset_1=None, **cal_args):
+    """
+    Calculate signal D2(n).
+
+    3.2)        Ds(n) > Ds(n-1) --> 1;       Ds(n) < Ds(n-1) --> -1;      Ds(n) == Ds(n-1) --> 0
+
+    Args:
+        ds_series(Series): signal Ds(n) series.
+        ds_series_offset_1(Series): signal Ds(n-1) series.
+        **cal_args(**dict): factor calculating arguments, including: symbols, target_date, data.
+
+    Returns:
+        Series: signal D2(n) series.
+    """
+    if ds_series is None:
+        ds_series = calculate_signal_d(**cal_args)
+    if ds_series_offset_1 is None:
+        cal_args['offset'] = cal_args.get('offset', 0) - 1
+        ds_series_offset_1 = calculate_signal_d(**cal_args)
+    return (ds_series - ds_series_offset_1).apply(np.sign)
+
+
+def calculate_signal_d3(c_series=None, c_series_offset_1=None, **cal_args):
+    """
+    Calculate signal D3(n).
+
+    3.3)        Close(n) > Close(n-1) --> 1;       Close(n) < Close(n-1) --> -1;      Close(n) == Close(n-1) --> 0
+
+    Args:
+        c_series(Series): factor Close(n) series.
+        c_series_offset_1(Series): factor Close(n-1) series.
+        **cal_args(**dict): factor calculating arguments, including: symbols, target_date, data.
+
+    Returns:
+        Series: signal D3(n) series.
+    """
+    if c_series is None:
+        c_series = get_close_price_series(**cal_args)
+    if c_series_offset_1 is None:
+        cal_args['offset'] = cal_args.get('offset', 0) - 1
+        c_series_offset_1 = get_close_price_series(**cal_args)
+    return (c_series - c_series_offset_1).apply(np.sign)
+
+
+def calculate_signal_d4(d_series=None, d_series_offset_1=None, **cal_args):
+    """
+    Calculate signal D4(n).
+
+    3.4)        D(n) > D(n-1) --> 1;       D(n) < D(n-1) --> -1;      D(n) == D(n-1) --> 0
+
+    Args:
+        d_series(Series): factor D(n) series.
+        d_series_offset_1(Series): factor D(n-1) series.
+        **cal_args(**dict): factor calculating arguments, including: symbols, target_date, data.
+
+    Returns:
+        Series: signal D4(n) series.
+    """
+    if d_series is None:
+        d_series = calculate_factor_d(**cal_args)
+    if d_series_offset_1 is None:
+        cal_args['offset'] = cal_args.get('offset', 0) - 1
+        d_series_offset_1 = calculate_factor_d(**cal_args)
+    print(d_series, d_series_offset_1)
+    return (d_series - d_series_offset_1).apply(np.sign)
+
+
 __all__ = [
     'calculate_signal_m',
     'calculate_signal_w',
@@ -319,5 +438,9 @@ __all__ = [
     'calculate_signal_w1',
     'calculate_signal_w2',
     'calculate_signal_w3',
-    'calculate_signal_w4'
+    'calculate_signal_w4',
+    'calculate_signal_d1',
+    'calculate_signal_d2',
+    'calculate_signal_d3',
+    'calculate_signal_d4'
 ]
