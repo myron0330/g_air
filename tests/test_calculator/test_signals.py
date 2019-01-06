@@ -22,8 +22,10 @@ class TestSignals(TestCase):
         self.factor_m = calculate_factor_m(self.symbols, self.target_date)
         self.factor_m_offset_20 = calculate_factor_m(self.symbols, self.target_date, offset=-20)
         self.factor_w = calculate_factor_w(self.symbols, self.target_date)
+        self.factor_w_offset_5 = calculate_factor_w(self.symbols, self.target_date, offset=-5)
         self.factor_d = calculate_factor_d(self.symbols, self.target_date)
         self.factor_close = get_close_price_series(self.symbols, self.target_date)
+        self.factor_close_offset_5 = get_close_price_series(self.symbols, self.target_date, offset=-5)
         self.factor_close_offset_20 = get_close_price_series(self.symbols, self.target_date, offset=-20)
         self.signal_m = calculate_signal_m(self.factor_q, self.factor_m)
         self.signal_w = calculate_signal_w(self.factor_m, self.factor_w)
@@ -31,6 +33,9 @@ class TestSignals(TestCase):
         self.signal_m_offset_20 = calculate_signal_m(symbols=self.symbols,
                                                      target_date=self.target_date,
                                                      offset=-20)
+        self.signal_w_offset_5 = calculate_signal_w(symbols=self.symbols,
+                                                    target_date=self.target_date,
+                                                    offset=-5)
 
     def test_calculate_m1(self):
         """
@@ -70,3 +75,42 @@ class TestSignals(TestCase):
         print(signal_m4)
         signal_m4_cal = calculate_signal_m4(symbols=self.symbols, target_date=self.target_date)
         print(signal_m4_cal)
+
+    def test_calculate_w1(self):
+        """
+        Test calculate w1.
+        """
+        signal_w1 = calculate_signal_w1(self.signal_w)
+        print(self.signal_w)
+        print(signal_w1)
+        signal_w1_cal = calculate_signal_w1(symbols=self.symbols, target_date=self.target_date)
+        print(signal_w1_cal)
+
+    def test_calculate_w2(self):
+        """
+        Test calculate w2.
+        """
+        signal_w2 = calculate_signal_w2(ws_series=self.signal_w, ws_series_offset_5=self.signal_w_offset_5)
+        print(signal_w2)
+        signal_w2_cal = calculate_signal_w2(symbols=self.symbols, target_date=self.target_date)
+        print(signal_w2_cal)
+
+    def test_calculate_w3(self):
+        """
+        Test calculate w3.
+        """
+        signal_w3 = calculate_signal_w3(c_series=self.factor_close,
+                                        c_series_offset_5=self.factor_close_offset_5)
+        print(signal_w3)
+        signal_w3_cal = calculate_signal_w3(symbols=self.symbols, target_date=self.target_date)
+        print(signal_w3_cal)
+
+    def test_calculate_w4(self):
+        """
+        Test calculate w4.
+        """
+        signal_w4 = calculate_signal_w4(w_series=self.factor_w,
+                                        w_series_offset_5=self.factor_w_offset_5)
+        print(signal_w4)
+        signal_w4_cal = calculate_signal_w4(symbols=self.symbols, target_date=self.target_date)
+        print(signal_w4_cal)
