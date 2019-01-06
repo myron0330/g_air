@@ -10,6 +10,7 @@ from g_air.data.database_api import (
     load_all_symbols,
     load_trading_days,
     load_trading_days_with_history_periods,
+    load_offset_trading_day,
     load_attribute,
     load_attributes_data
 )
@@ -43,6 +44,18 @@ class TestDatabaseAPI(TestCase):
         periods = 10
         data = load_trading_days_with_history_periods(date, periods)
         assert data
+
+    def test_load_offset_trading_day(self):
+        """
+        Test load offset trading day.
+        """
+        date = '2018-12-03'
+        offset = 0
+        print(date, offset, load_offset_trading_day(date, offset))
+        offset = 1
+        print(date, offset, load_offset_trading_day(date, offset))
+        offset = -1
+        print(date, offset, load_offset_trading_day(date, offset))
 
     def test_load_attribute(self):
         """

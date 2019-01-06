@@ -7,24 +7,28 @@
 """
 from ..data.database_api import (
     load_trading_days_with_history_periods,
+    load_offset_trading_day,
     load_attributes_data
 )
 
 
-def calculate_q(symbols, target_date, data=None):
+def calculate_factor_q(symbols=None, target_date=None, offset=0, data=None):
     """
-    Calculate factor Q.
+    Calculate factor Q(n).
 
-    1) Q = SCDQ(n) + TIQ(n) + CADQ(n)/2 + SCDM(n)/2 + SCDM(n-20)/2 + SCDM(n-40)/2
+    1.1) Q(n) = SCDQ(n) + TIQ(n) + CADQ(n)/2 + SCDM(n)/2 + SCDM(n-20)/2 + SCDM(n-40)/2
 
     Args:
         symbols(list): list of symbols
         target_date(string): target date, %Y-%m-%d
+        offset(int): target date offset
         data(dict): cached data from outside
 
     Returns:
-        dict: {symbol: Q_value}
+        Series: factor Q(n) series
     """
+    if offset:
+        target_date = load_offset_trading_day(target_date, offset)
     if not data:
         trading_days = load_trading_days_with_history_periods(date=target_date)
         data = load_attributes_data(symbols, trading_days, attributes=['scdq', 'tiq', 'cadq', 'scdm'])
@@ -37,23 +41,26 @@ def calculate_q(symbols, target_date, data=None):
             data['scdq'].iloc[target_date_index, :] + data['tiq'].iloc[target_date_index, :]
             + data['cadq'].iloc[target_date_index, :] + data['scdm'].iloc[target_date_index, :]
             + data['scdm'].iloc[target_date_offset_20, :] / 2 + data['scdm'].iloc[target_date_offset_40, :] / 2)
-    return q_series.to_dict()
+    return q_series
 
 
-def calculate_m(symbols, target_date, data=None):
+def calculate_factor_m(symbols=None, target_date=None, offset=0, data=None):
     """
-    Calculate factor M.
+    Calculate factor M(n).
 
-    2) M = SCDM(n) + TIM(n) + CADM(n)/2 + SCDW(n)/2 + SCDW(n-5)/2 + SCDW(n-10)/2 + SCDW(n-15)/2
+    1.2) M(n) = SCDM(n) + TIM(n) + CADM(n)/2 + SCDW(n)/2 + SCDW(n-5)/2 + SCDW(n-10)/2 + SCDW(n-15)/2
 
     Args:
         symbols(list): list of symbols
         target_date(string): target date, %Y-%m-%d
+        offset(int): target date offset
         data(dict): cached data from outside
 
     Returns:
-        dict: {symbol: M_value}
+        Series: factor M(n) series
     """
+    if offset:
+        target_date = load_offset_trading_day(target_date, offset)
     if not data:
         trading_days = load_trading_days_with_history_periods(date=target_date, history_periods=15)
         data = load_attributes_data(symbols, trading_days, attributes=['scdm', 'tim', 'cadm', 'scdw'])
@@ -69,23 +76,26 @@ def calculate_m(symbols, target_date, data=None):
         + data['scdw'].iloc[target_date_offset_5, :] / 2 + data['scdw'].iloc[target_date_offset_10, :] / 2
         + data['scdw'].iloc[target_date_offset_15, :] / 2
     )
-    return m_series.to_dict()
+    return m_series
 
 
-def calculate_w(symbols, target_date, data=None):
+def calculate_factor_w(symbols=None, target_date=None, offset=0, data=None):
     """
-    Calculate factor W.
+    Calculate factor W(n).
 
-    3) W = SCDW(n) + TIW(n) + CADW(n)/2 + SCDD(n)/2 + SCDD(n-1)/2 + SCDD(n-2)/2 + SCDD(n-3)/2 + SCDD(n-4)/2
+    1.3) W(n) = SCDW(n) + TIW(n) + CADW(n)/2 + SCDD(n)/2 + SCDD(n-1)/2 + SCDD(n-2)/2 + SCDD(n-3)/2 + SCDD(n-4)/2
 
     Args:
         symbols(list): list of symbols
         target_date(string): target date, %Y-%m-%d
+        offset(int): target date offset
         data(dict): cached data from outside
 
     Returns:
-        dict: {symbol: W_value}
+        Series: factor W(n) series
     """
+    if offset:
+        target_date = load_offset_trading_day(target_date, offset)
     if not data:
         trading_days = load_trading_days_with_history_periods(date=target_date, history_periods=4)
         data = load_attributes_data(symbols, trading_days, attributes=['scdw', 'tiw', 'cadw', 'scdd'])
@@ -102,23 +112,26 @@ def calculate_w(symbols, target_date, data=None):
         + data['scdd'].iloc[target_date_offset_1, :] / 2 + data['scdd'].iloc[target_date_offset_2, :] / 2
         + data['scdd'].iloc[target_date_offset_3, :] / 2 + data['scdd'].iloc[target_date_offset_4, :] / 2
     )
-    return w_series.to_dict()
+    return w_series
 
 
-def calculate_d(symbols, target_date, data=None):
+def calculate_factor_d(symbols=None, target_date=None, offset=0, data=None):
     """
-    Calculate factor D.
+    Calculate factor D(n).
 
-    4) D = SCDD(n) + TID(n) + CADD(n)/2 + SCDH1(n)/2 + SCDH2(n)/2 + SCDH3(n)/2 + SCDH4(n)/2
+    1.4) D(n) = SCDD(n) + TID(n) + CADD(n)/2 + SCDH1(n)/2 + SCDH2(n)/2 + SCDH3(n)/2 + SCDH4(n)/2
 
     Args:
         symbols(list): list of symbols
         target_date(string): target date, %Y-%m-%d
+        offset(int): target date offset
         data(dict): cached data from outside
 
     Returns:
-        dict: {symbol: D_value}
+        Series: factor D(n) series
     """
+    if offset:
+        target_date = load_offset_trading_day(target_date, offset)
     if not data:
         trading_days = load_trading_days_with_history_periods(date=target_date, history_periods=0)
         data = load_attributes_data(
@@ -132,12 +145,38 @@ def calculate_d(symbols, target_date, data=None):
         + data['scdh2'].iloc[target_date_index, :] / 2 + data['scdh3'].iloc[target_date_index, :] / 2
         + data['scdh4'].iloc[target_date_index, :] / 2
     )
-    return d_series.to_dict()
+    return d_series
+
+
+def get_close_price_series(symbols=None, target_date=None, offset=0, data=None):
+    """
+    Get factor Close(n).
+
+    Args:
+        symbols(list): list of symbols
+        target_date(string): target date, %Y-%m-%d
+        offset(int): target date offset
+        data(dict): cached data from outside
+
+    Returns:
+        Series: close price series
+    """
+    if offset:
+        target_date = load_offset_trading_day(target_date, offset)
+    if not data:
+        trading_days = load_trading_days_with_history_periods(date=target_date, history_periods=0)
+        data = load_attributes_data(symbols, trading_days, attributes=['adj_close_price'])
+    else:
+        trading_days = list(data['adj_close_price'].index)
+    target_date_index = trading_days.index(target_date)
+    c_series = data['adj_close_price'].iloc[target_date_index, :]
+    return c_series
 
 
 __all__ = [
-    'calculate_q',
-    'calculate_m',
-    'calculate_w',
-    'calculate_d'
+    'calculate_factor_q',
+    'calculate_factor_m',
+    'calculate_factor_w',
+    'calculate_factor_d',
+    'get_close_price_series'
 ]

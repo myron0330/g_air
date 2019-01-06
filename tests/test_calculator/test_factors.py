@@ -1,7 +1,7 @@
 """
 # -*- coding: UTF-8 -*-
 # **********************************************************************************#
-#     File: Test data api.
+#     File: Test factor calculator.
 #   Author: Myron
 # **********************************************************************************#
 """
@@ -22,26 +22,26 @@ class TestFactors(TestCase):
         """
         Test calculate Q.
         """
-        data = calculate_q(self.symbols, self.target_date)
+        data = calculate_factor_q(self.symbols, self.target_date)
         print(data)
 
     def test_calculate_m(self):
         """
         Test calculate M.
         """
-        data = calculate_m(self.symbols, self.target_date)
+        data = calculate_factor_m(self.symbols, self.target_date)
         print(data)
 
     def test_calculate_w(self):
         """
         Test calculate W.
         """
-        data = calculate_w(self.symbols, self.target_date)
+        data = calculate_factor_w(self.symbols, self.target_date)
         print(data)
 
     def test_calculate_d(self):
         """
         Test calculate D.
         """
-        data = calculate_d(self.symbols, self.target_date)
+        data = calculate_factor_d(self.symbols, self.target_date)
         print(data)

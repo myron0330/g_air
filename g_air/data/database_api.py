@@ -18,7 +18,7 @@ from ..const import (
 from ..utils.exceptions import Exceptions
 from ..utils.datetime import normalize_date
 from ..utils.decorator import time_consumption
-from ..const import MAX_PERIODS
+from ..const import MAX_SINGLE_FACTOR_PERIODS
 
 
 def load_all_symbols():
@@ -62,7 +62,7 @@ def load_trading_days(start=None, end=None):
     return result
 
 
-def load_trading_days_with_history_periods(date, history_periods=MAX_PERIODS):
+def load_trading_days_with_history_periods(date, history_periods=MAX_SINGLE_FACTOR_PERIODS):
     """
     Load trading days with history periods.
 
@@ -78,6 +78,22 @@ def load_trading_days_with_history_periods(date, history_periods=MAX_PERIODS):
     start_index = max(index - history_periods - 1, 0)
     result = all_trading_days[start_index:index]
     return result
+
+
+def load_offset_trading_day(date, offset=0):
+    """
+    Load offset trading day.
+
+    Args:
+        date(string): date, %Y-%m-%d
+        offset(int): all int,  offset < 0, backward; offset > 0, forward
+
+    Returns:
+        string: target date, %Y-%m-%d
+    """
+    all_trading_days = load_trading_days()
+    index = all_trading_days.index(date)
+    return all_trading_days[min(max(index + offset, 0), len(all_trading_days) -1)]
 
 
 def load_attribute(symbols=None, trading_days=None, attribute=None):
