@@ -16,7 +16,7 @@ def calculate_factor_q(symbols=None, target_date=None, offset=0, data=None):
     """
     Calculate factor Q(n).
 
-    1.1) Q(n) = SCDQ(n) + TIQ(n) + CADQ(n)/2 + SCDM(n)/2 + SCDM(n-20)/2 + SCDM(n-40)/2
+    1.1) Q(n) = SCDQ(n) + TIQ(n) + CADQ(n)/2 + (SCDM(n) + SCDM(n-20) + SCDM(n-40)) / (3 * 2)
 
     Args:
         symbols(list): list of symbols
@@ -39,8 +39,8 @@ def calculate_factor_q(symbols=None, target_date=None, offset=0, data=None):
     target_date_offset_40 = target_date_index - 40
     q_series = (
             data['scdq'].iloc[target_date_index, :] + data['tiq'].iloc[target_date_index, :]
-            + data['cadq'].iloc[target_date_index, :] + data['scdm'].iloc[target_date_index, :]
-            + data['scdm'].iloc[target_date_offset_20, :] / 2 + data['scdm'].iloc[target_date_offset_40, :] / 2)
+            + data['cadq'].iloc[target_date_index, :] / 2 + data['scdm'].iloc[target_date_index, :] / 6
+            + data['scdm'].iloc[target_date_offset_20, :] / 6 + data['scdm'].iloc[target_date_offset_40, :] / 6)
     return q_series
 
 
@@ -48,7 +48,7 @@ def calculate_factor_m(symbols=None, target_date=None, offset=0, data=None):
     """
     Calculate factor M(n).
 
-    1.2) M(n) = SCDM(n) + TIM(n) + CADM(n)/2 + SCDW(n)/2 + SCDW(n-5)/2 + SCDW(n-10)/2 + SCDW(n-15)/2
+    1.2) M(n) = SCDM(n) + TIM(n) + CADM(n)/2 + (SCDW(n) + SCDW(n-5) + SCDW(n-10) + SCDW(n-15)) / (4 * 2)
 
     Args:
         symbols(list): list of symbols
@@ -72,9 +72,9 @@ def calculate_factor_m(symbols=None, target_date=None, offset=0, data=None):
     target_date_offset_15 = target_date_index - 15
     m_series = (
         data['scdm'].iloc[target_date_index, :] + data['tim'].iloc[target_date_index, :]
-        + data['cadm'].iloc[target_date_index, :] / 2 + data['scdw'].iloc[target_date_index, :] / 2
-        + data['scdw'].iloc[target_date_offset_5, :] / 2 + data['scdw'].iloc[target_date_offset_10, :] / 2
-        + data['scdw'].iloc[target_date_offset_15, :] / 2
+        + data['cadm'].iloc[target_date_index, :] / 2 + data['scdw'].iloc[target_date_index, :] / 8
+        + data['scdw'].iloc[target_date_offset_5, :] / 8 + data['scdw'].iloc[target_date_offset_10, :] / 8
+        + data['scdw'].iloc[target_date_offset_15, :] / 8
     )
     return m_series
 
@@ -83,7 +83,7 @@ def calculate_factor_w(symbols=None, target_date=None, offset=0, data=None):
     """
     Calculate factor W(n).
 
-    1.3) W(n) = SCDW(n) + TIW(n) + CADW(n)/2 + SCDD(n)/2 + SCDD(n-1)/2 + SCDD(n-2)/2 + SCDD(n-3)/2 + SCDD(n-4)/2
+    1.3) W(n) = SCDW(n) + TIW(n) + CADW(n)/2 + (SCDD(n) + SCDD(n-1) + SCDD(n-2) + SCDD(n-3) + SCDD(n-4)) / (5 * 2)
 
     Args:
         symbols(list): list of symbols
@@ -108,9 +108,9 @@ def calculate_factor_w(symbols=None, target_date=None, offset=0, data=None):
     target_date_offset_4 = target_date_index - 4
     w_series = (
         data['scdw'].iloc[target_date_index, :] + data['tiw'].iloc[target_date_index, :]
-        + data['cadw'].iloc[target_date_index, :] / 2 + data['scdd'].iloc[target_date_index, :] / 2
-        + data['scdd'].iloc[target_date_offset_1, :] / 2 + data['scdd'].iloc[target_date_offset_2, :] / 2
-        + data['scdd'].iloc[target_date_offset_3, :] / 2 + data['scdd'].iloc[target_date_offset_4, :] / 2
+        + data['cadw'].iloc[target_date_index, :] / 2 + data['scdd'].iloc[target_date_index, :] / 10
+        + data['scdd'].iloc[target_date_offset_1, :] / 10 + data['scdd'].iloc[target_date_offset_2, :] / 10
+        + data['scdd'].iloc[target_date_offset_3, :] / 10 + data['scdd'].iloc[target_date_offset_4, :] / 10
     )
     return w_series
 
@@ -119,7 +119,7 @@ def calculate_factor_d(symbols=None, target_date=None, offset=0, data=None):
     """
     Calculate factor D(n).
 
-    1.4) D(n) = SCDD(n) + TID(n) + CADD(n)/2 + SCDH1(n)/2 + SCDH2(n)/2 + SCDH3(n)/2 + SCDH4(n)/2
+    1.4) D(n) = SCDD(n) + TID(n) + CADD(n)/2 + (SCDH1(n) + SCDH2(n) + SCDH3(n) + SCDH4(n)) / (4 * 2)
 
     Args:
         symbols(list): list of symbols
@@ -141,9 +141,9 @@ def calculate_factor_d(symbols=None, target_date=None, offset=0, data=None):
     target_date_index = trading_days.index(target_date)
     d_series = (
         data['scdd'].iloc[target_date_index, :] + data['tid'].iloc[target_date_index, :]
-        + data['cadd'].iloc[target_date_index, :] / 2 + data['scdh1'].iloc[target_date_index, :] / 2
-        + data['scdh2'].iloc[target_date_index, :] / 2 + data['scdh3'].iloc[target_date_index, :] / 2
-        + data['scdh4'].iloc[target_date_index, :] / 2
+        + data['cadd'].iloc[target_date_index, :] / 2 + data['scdh1'].iloc[target_date_index, :] / 8
+        + data['scdh2'].iloc[target_date_index, :] / 8 + data['scdh3'].iloc[target_date_index, :] / 8
+        + data['scdh4'].iloc[target_date_index, :] / 8
     )
     return d_series
 
