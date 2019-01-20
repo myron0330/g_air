@@ -120,6 +120,7 @@ def calculate_indicators(symbols=None, target_date=None):
         ('ZQ(n)', signal_zq)
     ])
     frame = pd.DataFrame(list(indicator_dict.values()), index=list(indicator_dict.keys()))
+    frame = frame.reindex(columns=sorted(frame.columns))
     frame.to_csv('result.csv', encoding='gbk')
     frame.to_excel('result.xlsx', encoding='gbk')
     return frame

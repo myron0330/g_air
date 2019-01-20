@@ -156,9 +156,13 @@ def load_attributes_data(symbols=None, trading_days=None, attributes=None):
         responses = [data.result() for data in as_completed(requests)]
     result = dict()
     if responses:
+        all_symbols_set = set()
         for frame in responses:
             attribute = frame.columns[-1]
             result[attribute] = frame.pivot(index='date', columns='symbol', values=attribute).reindex(trading_days)
+            all_symbols_set |= set(result[attribute].columns)
+        for attribute in result.keys():
+            result[attribute] = result[attribute].reindex(columns=list(all_symbols_set))
     return result
 
 
