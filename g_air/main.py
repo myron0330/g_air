@@ -61,7 +61,26 @@ def calculate_indicators(symbols=None, target_date=None):
     signal_d2 = calculate_signal_d2(ds_series=signal_d, ds_series_offset_1=signal_d_offset_1)
     signal_d3 = calculate_signal_d3(c_series=factor_close, c_series_offset_1=factor_close_offset_1)
     signal_d4 = calculate_signal_d4(d_series=factor_d, d_series_offset_1=factor_d_offset_1)
+    signal_j = calculate_signal_j(m1_series=signal_m1, w1_series=signal_w1, d1_series=signal_d1)
 
+    signal_m2l = calculate_signal_m2l(m2_series=signal_m2, target_date=target_date, data=data)
+    signal_w2l = calculate_signal_w2l(w2_series=signal_w2, target_date=target_date, data=data)
+    signal_d2l = calculate_signal_d2l(d2_series=signal_d2, target_date=target_date, data=data)
+    signal_m4l = calculate_signal_m4l(m4_series=signal_m4, target_date=target_date, data=data)
+    signal_w4l = calculate_signal_w4l(w4_series=signal_w4, target_date=target_date, data=data)
+    signal_d4l = calculate_signal_d4l(d4_series=signal_d4, target_date=target_date, data=data)
+
+    signal_m2b = calculate_signal_m2b(m2_series=signal_m2, m3_series=signal_m3)
+    signal_w2b = calculate_signal_w2b(w2_series=signal_w2, w3_series=signal_w3)
+    signal_d2b = calculate_signal_d2b(d2_series=signal_d2, d3_series=signal_d3)
+    signal_m4b = calculate_signal_m4b(m4_series=signal_m4, m3_series=signal_m3)
+    signal_w4b = calculate_signal_w4b(w4_series=signal_w4, w3_series=signal_w3)
+    signal_d4b = calculate_signal_d4b(d4_series=signal_d4, d3_series=signal_d3)
+
+    signal_z = calculate_signal_z(m2l_series=signal_m2l, m3_series=signal_m3)
+    signal_wz = calculate_signal_wz(w2l_series=signal_w2l, w3_series=signal_w3)
+    signal_t = calculate_signal_t(m2l_series=signal_m2l, m3_series=signal_m3)
+    signal_zq = calculate_signal_zq(j_series=signal_j, target_date=target_date, data=data)
     indicator_dict = OrderedDict([
         ('Q(n)', factor_q),
         ('M(n)', factor_m),
@@ -82,8 +101,24 @@ def calculate_indicators(symbols=None, target_date=None):
         ('D2(n)', signal_d2),
         ('D3(n)', signal_d3),
         ('D4(n)', signal_d4),
+        ('J(n)', signal_j),
+        ('M2L(n)', signal_m2l),
+        ('W2L(n)', signal_w2l),
+        ('D2L(n)', signal_d2l),
+        ('M4L(n)', signal_m4l),
+        ('W4L(n)', signal_w4l),
+        ('D4L(n)', signal_d4l),
+        ('M2B(n)', signal_m2b),
+        ('W2B(n)', signal_w2b),
+        ('D2B(n)', signal_d2b),
+        ('M4B(n)', signal_m4b),
+        ('W4B(n)', signal_w4b),
+        ('D4B(n)', signal_d4b),
+        ('Z(n)', signal_z),
+        ('WZ(n)', signal_wz),
+        ('T(n)', signal_t),
+        ('ZQ(n)', signal_zq)
     ])
-
     frame = pd.DataFrame(list(indicator_dict.values()), index=list(indicator_dict.keys()))
     frame.to_csv('result.csv', encoding='gbk')
     frame.to_excel('result.xlsx', encoding='gbk')

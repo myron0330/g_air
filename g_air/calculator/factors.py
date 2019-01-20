@@ -28,7 +28,8 @@ def calculate_factor_q(symbols=None, target_date=None, offset=0, data=None):
         Series: factor Q(n) series
     """
     if offset:
-        target_date = load_offset_trading_day(target_date, offset)
+        all_trading_days = list(data['scdq'].index) if data else None
+        target_date = load_offset_trading_day(target_date, offset=offset, all_trading_days=all_trading_days)
     if not data:
         trading_days = load_trading_days_with_history_periods(date=target_date)
         data = load_attributes_data(symbols, trading_days, attributes=['scdq', 'tiq', 'cadq', 'scdm'])
@@ -60,7 +61,8 @@ def calculate_factor_m(symbols=None, target_date=None, offset=0, data=None):
         Series: factor M(n) series
     """
     if offset:
-        target_date = load_offset_trading_day(target_date, offset)
+        all_trading_days = list(data['scdm'].index) if data else None
+        target_date = load_offset_trading_day(target_date, offset=offset, all_trading_days=all_trading_days)
     if not data:
         trading_days = load_trading_days_with_history_periods(date=target_date, history_periods=15)
         data = load_attributes_data(symbols, trading_days, attributes=['scdm', 'tim', 'cadm', 'scdw'])
@@ -95,7 +97,8 @@ def calculate_factor_w(symbols=None, target_date=None, offset=0, data=None):
         Series: factor W(n) series
     """
     if offset:
-        target_date = load_offset_trading_day(target_date, offset)
+        all_trading_days = list(data['scdw'].index) if data else None
+        target_date = load_offset_trading_day(target_date, offset=offset, all_trading_days=all_trading_days)
     if not data:
         trading_days = load_trading_days_with_history_periods(date=target_date, history_periods=4)
         data = load_attributes_data(symbols, trading_days, attributes=['scdw', 'tiw', 'cadw', 'scdd'])
@@ -131,7 +134,8 @@ def calculate_factor_d(symbols=None, target_date=None, offset=0, data=None):
         Series: factor D(n) series
     """
     if offset:
-        target_date = load_offset_trading_day(target_date, offset)
+        all_trading_days = list(data['scdd'].index) if data else None
+        target_date = load_offset_trading_day(target_date, offset=offset, all_trading_days=all_trading_days)
     if not data:
         trading_days = load_trading_days_with_history_periods(date=target_date, history_periods=0)
         data = load_attributes_data(
@@ -162,7 +166,8 @@ def get_close_price_series(symbols=None, target_date=None, offset=0, data=None):
         Series: close price series
     """
     if offset:
-        target_date = load_offset_trading_day(target_date, offset)
+        all_trading_days = list(data['adj_close_price'].index) if data else None
+        target_date = load_offset_trading_day(target_date, offset=offset, all_trading_days=all_trading_days)
     if not data:
         trading_days = load_trading_days_with_history_periods(date=target_date, history_periods=0)
         data = load_attributes_data(symbols, trading_days, attributes=['adj_close_price'])

@@ -12,4 +12,4 @@ AVAILABLE_DATA_FIELDS = [
     'tid', 'tiw', 'tim', 'tiq', 'adj_open_price', 'adj_close_price']
 MAX_THREADS = 5
 MAX_SINGLE_FACTOR_PERIODS = 40
-MAX_GLOBAL_PERIODS = 60
+MAX_GLOBAL_PERIODS = 90

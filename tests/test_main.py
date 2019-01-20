@@ -22,5 +22,5 @@ class TestMain(TestCase):
         """
         Test calculate indicators.
         """
-        data = calculate_indicators(symbols=self.symbols, target_date=self.target_date)
+        data = calculate_indicators(target_date=self.target_date)
         pass

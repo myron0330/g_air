@@ -6,6 +6,7 @@
 # **********************************************************************************#
 """
 import numpy as np
+import pandas as pd
 from .factors import *
 
 
@@ -423,8 +424,481 @@ def calculate_signal_d4(d_series=None, d_series_offset_1=None, **cal_args):
     if d_series_offset_1 is None:
         cal_args['offset'] = cal_args.get('offset', 0) - 1
         d_series_offset_1 = calculate_factor_d(**cal_args)
-    print(d_series, d_series_offset_1)
     return (d_series - d_series_offset_1).apply(np.sign)
+
+
+def calculate_signal_j(m1_series=None, w1_series=None, d1_series=None, **cal_args):
+    """
+    Calculate signal J(n).
+
+    J(n) = 0.25 * M1(n) + 0.5 * W1(n) + D1(n)
+
+    Args:
+        m1_series(Series): signal M1(n) series.
+        w1_series(Series): signal W1(n) series.
+        d1_series(Series): signal D1(n) series.
+        **cal_args(**dict): factor calculating arguments, including: symbols, target_date, data.
+
+    Returns:
+        Series: signal J(n) series.
+    """
+    if m1_series is None:
+        m1_series = calculate_signal_m1(**cal_args)
+    if w1_series is None:
+        w1_series = calculate_signal_w1(**cal_args)
+    if d1_series is None:
+        d1_series = calculate_signal_d1(**cal_args)
+    return 0.25 * m1_series + 0.5 * w1_series + d1_series
+
+
+def calculate_signal_m2l(m2_series=None, m2_series_offset_1=None, m2_series_offset_2=None,
+                         m2_series_offset_3=None, m2_series_offset_4=None, **cal_args):
+    """
+    Calculate signal M2L(n).
+
+    M2L(n) = M2(n) + M2(n-1) + M2(n-2) + M2(n-3) + M2(n-4)
+
+    Args:
+        m2_series(Series): signal M2(n) series.
+        m2_series_offset_1(Series): signal M2(n-1) series.
+        m2_series_offset_2(Series): signal M2(n-2) series.
+        m2_series_offset_3(Series): signal M2(n-3) series.
+        m2_series_offset_4(Series): signal M2(n-4) series.
+        **cal_args(**dict): factor calculating arguments, including: symbols, target_date, data.
+
+    Returns:
+        Series: signal M2L(n) series.
+    """
+    origin_offset = cal_args.get('offset', 0)
+    if m2_series is None:
+        m2_series = calculate_signal_m2(**cal_args)
+    if m2_series_offset_1 is None:
+        cal_args['offset'] = origin_offset - 1
+        m2_series_offset_1 = calculate_signal_m2(**cal_args)
+    if m2_series_offset_2 is None:
+        cal_args['offset'] = origin_offset - 2
+        m2_series_offset_2 = calculate_signal_m2(**cal_args)
+    if m2_series_offset_3 is None:
+        cal_args['offset'] = origin_offset - 3
+        m2_series_offset_3 = calculate_signal_m2(**cal_args)
+    if m2_series_offset_4 is None:
+        cal_args['offset'] = origin_offset - 4
+        m2_series_offset_4 = calculate_signal_m2(**cal_args)
+    return m2_series + m2_series_offset_1 + m2_series_offset_2 + m2_series_offset_3 + m2_series_offset_4
+
+
+def calculate_signal_w2l(w2_series=None, w2_series_offset_1=None, w2_series_offset_2=None,
+                         w2_series_offset_3=None, w2_series_offset_4=None, **cal_args):
+    """
+    Calculate signal W2L(n).
+
+    W2L(n) = W2(n) + W2(n-1) + W2(n-2) + W2(n-3) + W2(n-4)
+
+    Args:
+        w2_series(Series): signal W2(n) series.
+        w2_series_offset_1(Series): signal W2(n-1) series.
+        w2_series_offset_2(Series): signal W2(n-2) series.
+        w2_series_offset_3(Series): signal W2(n-3) series.
+        w2_series_offset_4(Series): signal W2(n-4) series.
+        **cal_args(**dict): factor calculating arguments, including: symbols, target_date, data.
+
+    Returns:
+        Series: signal W2L(n) series.
+    """
+    origin_offset = cal_args.get('offset', 0)
+    if w2_series is None:
+        w2_series = calculate_signal_w2(**cal_args)
+    if w2_series_offset_1 is None:
+        cal_args['offset'] = origin_offset - 1
+        w2_series_offset_1 = calculate_signal_w2(**cal_args)
+    if w2_series_offset_2 is None:
+        cal_args['offset'] = origin_offset - 2
+        w2_series_offset_2 = calculate_signal_w2(**cal_args)
+    if w2_series_offset_3 is None:
+        cal_args['offset'] = origin_offset - 3
+        w2_series_offset_3 = calculate_signal_w2(**cal_args)
+    if w2_series_offset_4 is None:
+        cal_args['offset'] = origin_offset - 4
+        w2_series_offset_4 = calculate_signal_w2(**cal_args)
+    return w2_series + w2_series_offset_1 + w2_series_offset_2 + w2_series_offset_3 + w2_series_offset_4
+
+
+def calculate_signal_d2l(d2_series=None, d2_series_offset_1=None, d2_series_offset_2=None,
+                         d2_series_offset_3=None, d2_series_offset_4=None, **cal_args):
+    """
+    Calculate signal D2L(n).
+
+    D2L(n) = D2(n) + D2(n-1) + D2(n-2) + D2(n-3) + D2(n-4)
+
+    Args:
+        d2_series(Series): signal D2(n) series.
+        d2_series_offset_1(Series): signal D2(n-1) series.
+        d2_series_offset_2(Series): signal D2(n-2) series.
+        d2_series_offset_3(Series): signal D2(n-3) series.
+        d2_series_offset_4(Series): signal D2(n-4) series.
+        **cal_args(**dict): factor calculating arguments, including: symbols, target_date, data.
+
+    Returns:
+        Series: signal D2L(n) series.
+    """
+    origin_offset = cal_args.get('offset', 0)
+    if d2_series is None:
+        d2_series = calculate_signal_d2(**cal_args)
+    if d2_series_offset_1 is None:
+        cal_args['offset'] = origin_offset - 1
+        d2_series_offset_1 = calculate_signal_d2(**cal_args)
+    if d2_series_offset_2 is None:
+        cal_args['offset'] = origin_offset - 2
+        d2_series_offset_2 = calculate_signal_d2(**cal_args)
+    if d2_series_offset_3 is None:
+        cal_args['offset'] = origin_offset - 3
+        d2_series_offset_3 = calculate_signal_d2(**cal_args)
+    if d2_series_offset_4 is None:
+        cal_args['offset'] = origin_offset - 4
+        d2_series_offset_4 = calculate_signal_d2(**cal_args)
+    return d2_series + d2_series_offset_1 + d2_series_offset_2 + d2_series_offset_3 + d2_series_offset_4
+
+
+def calculate_signal_m4l(m4_series=None, m4_series_offset_1=None, m4_series_offset_2=None,
+                         m4_series_offset_3=None, m4_series_offset_4=None, **cal_args):
+    """
+    Calculate signal M4L(n).
+
+    M4L(n) = M4(n) + M4(n-1) + M4(n-2) + M4(n-3) + M4(n-4)
+
+    Args:
+        m4_series(Series): signal M4(n) series.
+        m4_series_offset_1(Series): signal M4(n-1) series.
+        m4_series_offset_2(Series): signal M4(n-2) series.
+        m4_series_offset_3(Series): signal M4(n-3) series.
+        m4_series_offset_4(Series): signal M4(n-4) series.
+        **cal_args(**dict): factor calculating arguments, including: symbols, target_date, data.
+
+    Returns:
+        Series: signal M4L(n) series.
+    """
+    origin_offset = cal_args.get('offset', 0)
+    if m4_series is None:
+        m4_series = calculate_signal_m4(**cal_args)
+    if m4_series_offset_1 is None:
+        cal_args['offset'] = origin_offset - 1
+        m4_series_offset_1 = calculate_signal_m4(**cal_args)
+    if m4_series_offset_2 is None:
+        cal_args['offset'] = origin_offset - 2
+        m4_series_offset_2 = calculate_signal_m4(**cal_args)
+    if m4_series_offset_3 is None:
+        cal_args['offset'] = origin_offset - 3
+        m4_series_offset_3 = calculate_signal_m4(**cal_args)
+    if m4_series_offset_4 is None:
+        cal_args['offset'] = origin_offset - 4
+        m4_series_offset_4 = calculate_signal_m4(**cal_args)
+    return m4_series + m4_series_offset_1 + m4_series_offset_2 + m4_series_offset_3 + m4_series_offset_4
+
+
+def calculate_signal_w4l(w4_series=None, w4_series_offset_1=None, w4_series_offset_2=None,
+                         w4_series_offset_3=None, w4_series_offset_4=None, **cal_args):
+    """
+    Calculate signal W4L(n).
+
+    W4L(n) = W4(n) + W4(n-1) + W4(n-2) + W4(n-3) + W4(n-4)
+
+    Args:
+        w4_series(Series): signal W4(n) series.
+        w4_series_offset_1(Series): signal W4(n-1) series.
+        w4_series_offset_2(Series): signal W4(n-2) series.
+        w4_series_offset_3(Series): signal W4(n-3) series.
+        w4_series_offset_4(Series): signal W4(n-4) series.
+        **cal_args(**dict): factor calculating arguments, including: symbols, target_date, data.
+
+    Returns:
+        Series: signal W4L(n) series.
+    """
+    origin_offset = cal_args.get('offset', 0)
+    if w4_series is None:
+        w4_series = calculate_signal_w4(**cal_args)
+    if w4_series_offset_1 is None:
+        cal_args['offset'] = origin_offset - 1
+        w4_series_offset_1 = calculate_signal_w4(**cal_args)
+    if w4_series_offset_2 is None:
+        cal_args['offset'] = origin_offset - 2
+        w4_series_offset_2 = calculate_signal_w4(**cal_args)
+    if w4_series_offset_3 is None:
+        cal_args['offset'] = origin_offset - 3
+        w4_series_offset_3 = calculate_signal_w4(**cal_args)
+    if w4_series_offset_4 is None:
+        cal_args['offset'] = origin_offset - 4
+        w4_series_offset_4 = calculate_signal_w4(**cal_args)
+    return w4_series + w4_series_offset_1 + w4_series_offset_2 + w4_series_offset_3 + w4_series_offset_4
+
+
+def calculate_signal_d4l(d4_series=None, d4_series_offset_1=None, d4_series_offset_2=None,
+                         d4_series_offset_3=None, d4_series_offset_4=None, **cal_args):
+    """
+    Calculate signal D4L(n).
+
+    D4L(n) = D4(n) + D4(n-1) + D4(n-2) + D4(n-3) + D4(n-4)
+
+    Args:
+        d4_series(Series): signal D4(n) series.
+        d4_series_offset_1(Series): signal D4(n-1) series.
+        d4_series_offset_2(Series): signal D4(n-2) series.
+        d4_series_offset_3(Series): signal D4(n-3) series.
+        d4_series_offset_4(Series): signal D4(n-4) series.
+        **cal_args(**dict): factor calculating arguments, including: symbols, target_date, data.
+
+    Returns:
+        Series: signal D4L(n) series.
+    """
+    origin_offset = cal_args.get('offset', 0)
+    if d4_series is None:
+        d4_series = calculate_signal_d4(**cal_args)
+    if d4_series_offset_1 is None:
+        cal_args['offset'] = origin_offset - 1
+        d4_series_offset_1 = calculate_signal_d4(**cal_args)
+    if d4_series_offset_2 is None:
+        cal_args['offset'] = origin_offset - 2
+        d4_series_offset_2 = calculate_signal_d4(**cal_args)
+    if d4_series_offset_3 is None:
+        cal_args['offset'] = origin_offset - 3
+        d4_series_offset_3 = calculate_signal_d4(**cal_args)
+    if d4_series_offset_4 is None:
+        cal_args['offset'] = origin_offset - 4
+        d4_series_offset_4 = calculate_signal_d4(**cal_args)
+    return d4_series + d4_series_offset_1 + d4_series_offset_2 + d4_series_offset_3 + d4_series_offset_4
+
+
+def calculate_signal_m2b(m2_series=None, m3_series=None, **cal_args):
+    """
+    Calculate signal M2B(n).
+
+    M2(n) = M3(n) --> 0;    else --> M2(n)
+
+    Args:
+        m2_series(Series): signal M2(n) series.
+        m3_series(Series): signal M3(n) series.
+        **cal_args(**dict): factor calculating arguments, including: symbols, target_date, data.
+
+    Returns:
+        Series: signal M2B(n) series.
+    """
+    if m2_series is None:
+        m2_series = calculate_signal_m2(**cal_args)
+    if m3_series is None:
+        m3_series = calculate_signal_m3(**cal_args)
+    multiplier = pd.Series(m2_series == m3_series).apply(lambda x: 0 if x else 1)
+    return (m2_series * multiplier).apply(lambda x: 0 if x == -0 else x)
+
+
+def calculate_signal_w2b(w2_series=None, w3_series=None, **cal_args):
+    """
+    Calculate signal W2B(n).
+
+    W2(n) = W3(n) --> 0;    else --> W2(n)
+
+    Args:
+        w2_series(Series): signal W2(n) series.
+        w3_series(Series): signal W3(n) series.
+        **cal_args(**dict): factor calculating arguments, including: symbols, target_date, data.
+
+    Returns:
+        Series: signal W2B(n) series.
+    """
+    if w2_series is None:
+        w2_series = calculate_signal_w2(**cal_args)
+    if w3_series is None:
+        w3_series = calculate_signal_w3(**cal_args)
+    multiplier = pd.Series(w2_series == w3_series).apply(lambda x: 0 if x else 1)
+    return (w2_series * multiplier).apply(lambda x: 0 if x == -0 else x)
+
+
+def calculate_signal_d2b(d2_series=None, d3_series=None, **cal_args):
+    """
+    Calculate signal D2B(n).
+
+    D2(n) = D3(n) --> 0;    else --> D2(n)
+
+    Args:
+        d2_series(Series): signal D2(n) series.
+        d3_series(Series): signal D3(n) series.
+        **cal_args(**dict): factor calculating arguments, including: symbols, target_date, data.
+
+    Returns:
+        Series: signal D2B(n) series.
+    """
+    if d2_series is None:
+        d2_series = calculate_signal_d2(**cal_args)
+    if d3_series is None:
+        d3_series = calculate_signal_d3(**cal_args)
+    multiplier = pd.Series(d2_series == d3_series).apply(lambda x: 0 if x else 1)
+    return (d2_series * multiplier).apply(lambda x: 0 if x == -0 else x)
+
+
+def calculate_signal_m4b(m4_series=None, m3_series=None, **cal_args):
+    """
+    Calculate signal M2B(n).
+
+    M4(n) = M3(n) --> 0;    else --> M4(n)
+
+    Args:
+        m4_series(Series): signal M4(n) series.
+        m3_series(Series): signal M3(n) series.
+        **cal_args(**dict): factor calculating arguments, including: symbols, target_date, data.
+
+    Returns:
+        Series: signal M4B(n) series.
+    """
+    if m4_series is None:
+        m4_series = calculate_signal_m4(**cal_args)
+    if m3_series is None:
+        m3_series = calculate_signal_m3(**cal_args)
+    multiplier = pd.Series(m4_series == m3_series).apply(lambda x: 0 if x else 1)
+    return (m4_series * multiplier).apply(lambda x: 0 if x == -0 else x)
+
+
+def calculate_signal_w4b(w4_series=None, w3_series=None, **cal_args):
+    """
+    Calculate signal W4B(n).
+
+    W4(n) = W3(n) --> 0;    else --> W4(n)
+
+    Args:
+        w4_series(Series): signal W4(n) series.
+        w3_series(Series): signal W3(n) series.
+        **cal_args(**dict): factor calculating arguments, including: symbols, target_date, data.
+
+    Returns:
+        Series: signal W4B(n) series.
+    """
+    if w4_series is None:
+        w4_series = calculate_signal_w4(**cal_args)
+    if w3_series is None:
+        w3_series = calculate_signal_w3(**cal_args)
+    multiplier = pd.Series(w4_series == w3_series).apply(lambda x: 0 if x else 1)
+    return (w4_series * multiplier).apply(lambda x: 0 if x == -0 else x)
+
+
+def calculate_signal_d4b(d4_series=None, d3_series=None, **cal_args):
+    """
+    Calculate signal D4B(n).
+
+    D4(n) = D3(n) --> 0;    else --> D4(n)
+
+    Args:
+        d4_series(Series): signal D4(n) series.
+        d3_series(Series): signal D3(n) series.
+        **cal_args(**dict): factor calculating arguments, including: symbols, target_date, data.
+
+    Returns:
+        Series: signal D2B(n) series.
+    """
+    if d4_series is None:
+        d4_series = calculate_signal_d4(**cal_args)
+    if d3_series is None:
+        d3_series = calculate_signal_d3(**cal_args)
+    multiplier = pd.Series(d4_series == d3_series).apply(lambda x: 0 if x else 1)
+    return (d4_series * multiplier).apply(lambda x: 0 if x == -0 else x)
+
+
+def calculate_signal_z(m2l_series=None, m3_series=None,  **cal_args):
+    """
+    Calculate signal Z(n).
+
+    M2L(n) < 0 & M3(n) = 1 --> M2L(n);    else --> 0
+
+    Args:
+        m2l_series(Series): signal M2L(n) series.
+        m3_series(Series): signal M3(n) series.
+        **cal_args(**dict): factor calculating arguments, including: symbols, target_date, data.
+
+    Returns:
+        Series: signal Z(n) series.
+    """
+    if m2l_series is None:
+        m2l_series = calculate_signal_m2l(**cal_args)
+    if m3_series is None:
+        m3_series = calculate_signal_m3(**cal_args)
+    multiplier = pd.Series((m2l_series < 0) & (m3_series == 1)).apply(lambda x: 1 if x else 0)
+    return (m2l_series * multiplier).apply(lambda x: 0 if x == -0 else x)
+
+
+def calculate_signal_wz(w2l_series=None, w3_series=None,  **cal_args):
+    """
+    Calculate signal WZ(n).
+
+    W2L(n) < 0 & W3(n) = 1 --> W2L(n);    else --> 0
+
+    Args:
+        w2l_series(Series): signal W2L(n) series.
+        w3_series(Series): signal W3(n) series.
+        **cal_args(**dict): factor calculating arguments, including: symbols, target_date, data.
+
+    Returns:
+        Series: signal WZ(n) series.
+    """
+    if w2l_series is None:
+        w2l_series = calculate_signal_w2l(**cal_args)
+    if w3_series is None:
+        w3_series = calculate_signal_w3(**cal_args)
+    multiplier = pd.Series((w2l_series < 0) & (w3_series == 1)).apply(lambda x: 1 if x else 0)
+    return (w2l_series * multiplier).apply(lambda x: 0 if x == -0 else x)
+
+
+def calculate_signal_t(m2l_series=None, m3_series=None,  **cal_args):
+    """
+    Calculate signal T(n).
+
+    M2L(n) > 0 & M3(n) = -1 --> M2L(n);    else --> 0
+
+    Args:
+        m2l_series(Series): signal M2L(n) series.
+        m3_series(Series): signal M3(n) series.
+        **cal_args(**dict): factor calculating arguments, including: symbols, target_date, data.
+
+    Returns:
+        Series: signal T(n) series.
+    """
+    if m2l_series is None:
+        m2l_series = calculate_signal_m2l(**cal_args)
+    if m3_series is None:
+        m3_series = calculate_signal_m3(**cal_args)
+    multiplier = pd.Series((m2l_series > 0) & (m3_series == -1)).apply(lambda x: 1 if x else 0)
+    return (m2l_series * multiplier).apply(lambda x: 0 if x == -0 else x)
+
+
+def calculate_signal_zq(j_series=None, j_series_offset_1=None, j_series_offset_2=None,
+                        j_series_offset_3=None, j_series_offset_4=None, **cal_args):
+    """
+    Calculate signal ZQ(n).
+
+    ZQ(n) = J(n) + J(n-1) + J(n-2) + J(n-3) + J(n-4)
+
+    Args:
+        j_series(Series): signal J(n) series.
+        j_series_offset_1(Series): signal J(n-1) series.
+        j_series_offset_2(Series): signal J(n-2) series.
+        j_series_offset_3(Series): signal J(n-3) series.
+        j_series_offset_4(Series): signal J(n-4) series.
+        **cal_args(**dict): factor calculating arguments, including: symbols, target_date, data.
+
+    Returns:
+        Series: signal ZQ(n) series.
+    """
+    origin_offset = cal_args.get('offset', 0)
+    if j_series is None:
+        j_series = calculate_signal_j(**cal_args)
+    if j_series_offset_1 is None:
+        cal_args['offset'] = origin_offset - 1
+        j_series_offset_1 = calculate_signal_j(**cal_args)
+    if j_series_offset_2 is None:
+        cal_args['offset'] = origin_offset - 2
+        j_series_offset_2 = calculate_signal_j(**cal_args)
+    if j_series_offset_3 is None:
+        cal_args['offset'] = origin_offset - 3
+        j_series_offset_3 = calculate_signal_j(**cal_args)
+    if j_series_offset_4 is None:
+        cal_args['offset'] = origin_offset - 4
+        j_series_offset_4 = calculate_signal_j(**cal_args)
+    return j_series + j_series_offset_1 + j_series_offset_2 + j_series_offset_3 + j_series_offset_4
 
 
 __all__ = [
@@ -442,5 +916,22 @@ __all__ = [
     'calculate_signal_d1',
     'calculate_signal_d2',
     'calculate_signal_d3',
-    'calculate_signal_d4'
+    'calculate_signal_d4',
+    'calculate_signal_j',
+    'calculate_signal_m2l',
+    'calculate_signal_w2l',
+    'calculate_signal_d2l',
+    'calculate_signal_m4l',
+    'calculate_signal_w4l',
+    'calculate_signal_d4l',
+    'calculate_signal_m2b',
+    'calculate_signal_w2b',
+    'calculate_signal_d2b',
+    'calculate_signal_m4b',
+    'calculate_signal_w4b',
+    'calculate_signal_d4b',
+    'calculate_signal_z',
+    'calculate_signal_wz',
+    'calculate_signal_t',
+    'calculate_signal_zq'
 ]

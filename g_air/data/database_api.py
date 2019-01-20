@@ -80,20 +80,21 @@ def load_trading_days_with_history_periods(date, history_periods=MAX_SINGLE_FACT
     return result
 
 
-def load_offset_trading_day(date, offset=0):
+def load_offset_trading_day(date, offset=0, all_trading_days=None):
     """
     Load offset trading day.
 
     Args:
         date(string): date, %Y-%m-%d
         offset(int): all int,  offset < 0, backward; offset > 0, forward
+        all_trading_days(list): all trading days list
 
     Returns:
         string: target date, %Y-%m-%d
     """
-    all_trading_days = load_trading_days()
+    all_trading_days = all_trading_days or load_trading_days()
     index = all_trading_days.index(date)
-    return all_trading_days[min(max(index + offset, 0), len(all_trading_days) -1)]
+    return all_trading_days[min(max(index + offset, 0), len(all_trading_days) - 1)]
 
 
 def load_attribute(symbols=None, trading_days=None, attribute=None):
