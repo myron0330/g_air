@@ -151,17 +151,16 @@ def calculate_indicators_of_date_range(symbol=None, target_date_range=None, dump
         trading_days = history_trading_days + target_date_range[1:]
         data = load_attributes_data([symbol], trading_days, attributes=AVAILABLE_DATA_FIELDS)
 
-    results = list()
+    results = OrderedDict()
     for target_date in target_date_range:
-        results.append((
-            target_date, calculate_indicators(
+        results[target_date] = calculate_indicators(
                 symbols=[symbol],
                 target_date=target_date,
                 dump=False,
                 data=data
-            )))
-    trading_days = list(map(lambda x: x[0], results))
-    frame = pd.concat(map(lambda x: x[-1], results), axis=1)
+            )
+    trading_days = results.keys()
+    frame = pd.concat(results.values(), axis=1)
     frame.columns = trading_days
     if dump:
         frame.to_csv('result.csv', encoding='gbk')
