@@ -121,7 +121,8 @@ def load_attribute(symbols=None, trading_days=None, attribute=None):
         from_clause = '{}'.format(table_map.get(attribute, attribute))
         sql = """select {} from {}""".format(select_clause, from_clause)
         where_clause = """"""
-        symbol_condition = """代码 in {}""".format(tuple(symbols)) if symbols else """"""
+        symbol_condition = """代码 in ({})""".format(','.join(
+            map(lambda x: '\"{}\"'.format(x), tuple(symbols)))) if symbols else """"""
         trading_days_str_list = trading_days or list()
         trading_days_condition = """substr(日期, 1, 10) in ({})""".format(
             ','.join(map(lambda x: '\"{}\"'.format(x), trading_days_str_list))) if trading_days_str_list else """"""

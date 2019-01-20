@@ -427,30 +427,6 @@ def calculate_signal_d4(d_series=None, d_series_offset_1=None, **cal_args):
     return (d_series - d_series_offset_1).apply(np.sign)
 
 
-def calculate_signal_j(m1_series=None, w1_series=None, d1_series=None, **cal_args):
-    """
-    Calculate signal J(n).
-
-    J(n) = 0.25 * M1(n) + 0.5 * W1(n) + D1(n)
-
-    Args:
-        m1_series(Series): signal M1(n) series.
-        w1_series(Series): signal W1(n) series.
-        d1_series(Series): signal D1(n) series.
-        **cal_args(**dict): factor calculating arguments, including: symbols, target_date, data.
-
-    Returns:
-        Series: signal J(n) series.
-    """
-    if m1_series is None:
-        m1_series = calculate_signal_m1(**cal_args)
-    if w1_series is None:
-        w1_series = calculate_signal_w1(**cal_args)
-    if d1_series is None:
-        d1_series = calculate_signal_d1(**cal_args)
-    return 0.25 * m1_series + 0.5 * w1_series + d1_series
-
-
 def calculate_signal_m2l(m2_series=None, m2_series_offset_1=None, m2_series_offset_2=None,
                          m2_series_offset_3=None, m2_series_offset_4=None, **cal_args):
     """
@@ -797,6 +773,30 @@ def calculate_signal_d4b(d4_series=None, d3_series=None, **cal_args):
         d3_series = calculate_signal_d3(**cal_args)
     multiplier = pd.Series(d4_series == d3_series).apply(lambda x: 0 if x else 1)
     return (d4_series * multiplier).apply(lambda x: 0 if x == -0 else x)
+
+
+def calculate_signal_j(m2b_series=None, w2b_series=None, d2b_series=None, **cal_args):
+    """
+    Calculate signal J(n).
+
+    J(n) = 0.25 * M2B(n) + 0.5 * W2B(n) + D2B(n)
+
+    Args:
+        m2b_series(Series): signal M2B(n) series.
+        w2b_series(Series): signal W2B(n) series.
+        d2b_series(Series): signal D2B(n) series.
+        **cal_args(**dict): factor calculating arguments, including: symbols, target_date, data.
+
+    Returns:
+        Series: signal J(n) series.
+    """
+    if m2b_series is None:
+        m2b_series = calculate_signal_m2b(**cal_args)
+    if w2b_series is None:
+        w2b_series = calculate_signal_w2b(**cal_args)
+    if d2b_series is None:
+        d2b_series = calculate_signal_d2b(**cal_args)
+    return 0.25 * m2b_series + 0.5 * w2b_series + d2b_series
 
 
 def calculate_signal_z(m2l_series=None, m3_series=None,  **cal_args):

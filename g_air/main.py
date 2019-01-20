@@ -15,19 +15,22 @@ from .const import (
     MAX_GLOBAL_PERIODS)
 
 
-def calculate_indicators(symbols=None, target_date=None):
+def calculate_indicators(symbols=None, target_date=None, dump=True, data=None):
     """
     Calculate indicators of symbols and target date.
 
     Args:
         symbols(list): list of symbols
         target_date(string): target date, %Y-%m-%d
+        dump(boolean): whether to dump to excel and csv files
+        data(dict): cached data from outside
 
     Returns:
-        dict: symbol indicators
+        dict: symbol indicators frame
     """
-    trading_days = load_trading_days_with_history_periods(date=target_date, history_periods=MAX_GLOBAL_PERIODS)
-    data = load_attributes_data(symbols, trading_days, attributes=AVAILABLE_DATA_FIELDS)
+    if data is None:
+        trading_days = load_trading_days_with_history_periods(date=target_date, history_periods=MAX_GLOBAL_PERIODS)
+        data = load_attributes_data(symbols, trading_days, attributes=AVAILABLE_DATA_FIELDS)
     factor_q = calculate_factor_q(target_date=target_date, data=data)
     factor_m = calculate_factor_m(target_date=target_date, data=data)
     factor_m_offset_20 = calculate_factor_m(target_date=target_date, offset=-20, data=data)
@@ -61,7 +64,6 @@ def calculate_indicators(symbols=None, target_date=None):
     signal_d2 = calculate_signal_d2(ds_series=signal_d, ds_series_offset_1=signal_d_offset_1)
     signal_d3 = calculate_signal_d3(c_series=factor_close, c_series_offset_1=factor_close_offset_1)
     signal_d4 = calculate_signal_d4(d_series=factor_d, d_series_offset_1=factor_d_offset_1)
-    signal_j = calculate_signal_j(m1_series=signal_m1, w1_series=signal_w1, d1_series=signal_d1)
 
     signal_m2l = calculate_signal_m2l(m2_series=signal_m2, target_date=target_date, data=data)
     signal_w2l = calculate_signal_w2l(w2_series=signal_w2, target_date=target_date, data=data)
@@ -76,6 +78,7 @@ def calculate_indicators(symbols=None, target_date=None):
     signal_m4b = calculate_signal_m4b(m4_series=signal_m4, m3_series=signal_m3)
     signal_w4b = calculate_signal_w4b(w4_series=signal_w4, w3_series=signal_w3)
     signal_d4b = calculate_signal_d4b(d4_series=signal_d4, d3_series=signal_d3)
+    signal_j = calculate_signal_j(m2b_series=signal_m2b, w2b_series=signal_w2b, d2b_series=signal_d2b)
 
     signal_z = calculate_signal_z(m2l_series=signal_m2l, m3_series=signal_m3)
     signal_wz = calculate_signal_wz(w2l_series=signal_w2l, w3_series=signal_w3)
@@ -121,6 +124,46 @@ def calculate_indicators(symbols=None, target_date=None):
     ])
     frame = pd.DataFrame(list(indicator_dict.values()), index=list(indicator_dict.keys()))
     frame = frame.reindex(columns=sorted(frame.columns))
-    frame.to_csv('result.csv', encoding='gbk')
-    frame.to_excel('result.xlsx', encoding='gbk')
+    if dump:
+        frame.to_csv('result.csv', encoding='gbk')
+        frame.to_excel('result.xlsx', encoding='gbk')
+    return frame
+
+
+def calculate_indicators_of_date_range(symbol=None, target_date_range=None, dump=True, data=None):
+    """
+    Calculate indicators of a specific symbol in a target date range.
+
+    Args:
+        symbol(string): symbol name
+        target_date_range(string): target date, %Y-%m-%d
+        dump(boolean): whether to dump to excel and csv files
+        data(dict): cached data from outside
+
+    Returns:
+        dict: symbol indicators frame
+    """
+    if data is None:
+        target_date_range = sorted(target_date_range)
+        start_date = target_date_range[0]
+        history_trading_days = load_trading_days_with_history_periods(
+            date=start_date, history_periods=MAX_GLOBAL_PERIODS)
+        trading_days = history_trading_days + target_date_range[1:]
+        data = load_attributes_data([symbol], trading_days, attributes=AVAILABLE_DATA_FIELDS)
+
+    results = list()
+    for target_date in target_date_range:
+        results.append((
+            target_date, calculate_indicators(
+                symbols=[symbol],
+                target_date=target_date,
+                dump=False,
+                data=data
+            )))
+    trading_days = list(map(lambda x: x[0], results))
+    frame = pd.concat(map(lambda x: x[-1], results), axis=1)
+    frame.columns = trading_days
+    if dump:
+        frame.to_csv('result.csv', encoding='gbk')
+        frame.to_excel('result.xlsx', encoding='gbk')
     return frame
