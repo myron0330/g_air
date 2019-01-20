@@ -122,4 +122,4 @@ def calculate_indicators(symbols=None, target_date=None):
     frame = pd.DataFrame(list(indicator_dict.values()), index=list(indicator_dict.keys()))
     frame.to_csv('result.csv', encoding='gbk')
     frame.to_excel('result.xlsx', encoding='gbk')
-    pass
+    return frame
