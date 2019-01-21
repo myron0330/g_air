@@ -7,12 +7,40 @@
 """
 import pandas as pd
 from collections import OrderedDict
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from .data.database_api import *
 from .calculator.factors import *
 from .calculator.signals import *
 from .const import (
     AVAILABLE_DATA_FIELDS,
     MAX_GLOBAL_PERIODS)
+
+
+def concurrent_processing(func):
+    """
+    Decorator for supporting concurrent process.
+
+    Args:
+        func(function): calculator function
+
+    Returns:
+        function: decorator
+    """
+
+    def decorator(*args, **kwargs):
+        """
+        Args:
+            *args(*list): essential parameters
+            **kwargs(**dict): key-word parameters
+
+        Returns:
+            pandas.DataFrame: symbol indicators frame
+        """
+        parameters = kwargs
+        code_variable_names = func.__code__.co_varnames
+        if args:
+            essential_parameters = dict(zip(code_variable_names[:len(args)], args))
+            parameters.update(essential_parameters)
 
 
 def calculate_indicators(symbols=None, target_date=None, dump=True, data=None, excel_name='result.xlsx'):
@@ -27,7 +55,7 @@ def calculate_indicators(symbols=None, target_date=None, dump=True, data=None, e
         excel_name(string): excel name
 
     Returns:
-        dict: symbol indicators frame
+        pandas.DataFrame: symbol indicators frame
     """
     if data is None:
         trading_days = load_trading_days_with_history_periods(date=target_date, history_periods=MAX_GLOBAL_PERIODS)
@@ -81,9 +109,9 @@ def calculate_indicators(symbols=None, target_date=None, dump=True, data=None, e
     signal_d4b = calculate_signal_d4b(d4_series=signal_d4, d3_series=signal_d3)
     signal_j = calculate_signal_j(m2b_series=signal_m2b, w2b_series=signal_w2b, d2b_series=signal_d2b)
 
-    signal_z = calculate_signal_z(m2l_series=signal_m2l, m3_series=signal_m3)
-    signal_wz = calculate_signal_wz(w2l_series=signal_w2l, w3_series=signal_w3)
-    signal_t = calculate_signal_t(m2l_series=signal_m2l, m3_series=signal_m3)
+    signal_z = calculate_signal_z(target_date=target_date, data=data)
+    signal_wz = calculate_signal_wz(target_date=target_date, data=data)
+    signal_t = calculate_signal_t(target_date=target_date, data=data)
     signal_zq = calculate_signal_zq(j_series=signal_j, target_date=target_date, data=data)
     indicator_dict = OrderedDict([
         ('Q(n)', factor_q),
@@ -143,7 +171,7 @@ def calculate_indicators_of_date_range(
         excel_name(string): excel name
 
     Returns:
-        dict: symbol indicators frame
+        pandas.DataFrame: symbol indicators frame
     """
     if data is None:
         target_date_range = sorted(target_date_range)
