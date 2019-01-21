@@ -38,8 +38,12 @@ class TestMain(TestCase):
         """
         Test calculate indicators of date range.
         """
-        symbol = '600456.SH'
-        target_date_range = load_trading_days(start='2019-01-09', end='2019-01-15')
+        # symbol = '600456.SH'
+        # symbol = '603043.SH'
+        symbol = '002352.SZ'
+        target_date_range = load_trading_days(start='2018-12-14', end='2018-12-14')
         data = calculate_indicators_of_date_range(
-            symbol=symbol, target_date_range=target_date_range)
+            symbol=symbol, target_date_range=target_date_range,
+            excel_name='.'.join([symbol, 'xlsx']),
+        )
         pass
