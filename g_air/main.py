@@ -15,7 +15,7 @@ from .const import (
     MAX_GLOBAL_PERIODS)
 
 
-def calculate_indicators(symbols=None, target_date=None, dump=True, data=None):
+def calculate_indicators(symbols=None, target_date=None, dump=True, data=None, excel_name='result.xlsx'):
     """
     Calculate indicators of symbols and target date.
 
@@ -24,6 +24,7 @@ def calculate_indicators(symbols=None, target_date=None, dump=True, data=None):
         target_date(string): target date, %Y-%m-%d
         dump(boolean): whether to dump to excel and csv files
         data(dict): cached data from outside
+        excel_name(string): excel name
 
     Returns:
         dict: symbol indicators frame
@@ -125,12 +126,12 @@ def calculate_indicators(symbols=None, target_date=None, dump=True, data=None):
     frame = pd.DataFrame(list(indicator_dict.values()), index=list(indicator_dict.keys()))
     frame = frame.reindex(columns=sorted(frame.columns))
     if dump:
-        frame.to_csv('result.csv', encoding='gbk')
-        frame.to_excel('result.xlsx', encoding='gbk')
+        frame.to_excel(excel_name, encoding='gbk')
     return frame
 
 
-def calculate_indicators_of_date_range(symbol=None, target_date_range=None, dump=True, data=None):
+def calculate_indicators_of_date_range(
+        symbol=None, target_date_range=None, dump=True, data=None, excel_name='result.xlsx'):
     """
     Calculate indicators of a specific symbol in a target date range.
 
@@ -139,6 +140,7 @@ def calculate_indicators_of_date_range(symbol=None, target_date_range=None, dump
         target_date_range(string): target date, %Y-%m-%d
         dump(boolean): whether to dump to excel and csv files
         data(dict): cached data from outside
+        excel_name(string): excel name
 
     Returns:
         dict: symbol indicators frame
@@ -163,6 +165,5 @@ def calculate_indicators_of_date_range(symbol=None, target_date_range=None, dump
     frame = pd.concat(results.values(), axis=1)
     frame.columns = trading_days
     if dump:
-        frame.to_csv('result.csv', encoding='gbk')
-        frame.to_excel('result.xlsx', encoding='gbk')
+        frame.to_excel(excel_name, encoding='gbk')
     return frame
