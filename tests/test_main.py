@@ -23,8 +23,9 @@ class TestMain(TestCase):
         initialize set up.
         """
         extended_symbols = load_all_symbols()[:20]
-        self.symbols = ['000001.SZ', '600000.SH'] + list(set(extended_symbols) - {'000001.SZ', '600000.SH'})
-        self.target_date = '2019-01-04'
+        # self.symbols = ['000001.SZ', '600000.SH'] + list(set(extended_symbols) - {'000001.SZ', '600000.SH'})
+        self.symbols = ['600456.SH']
+        self.target_date = '2019-01-14'
 
     def test_calculate_indicators(self):
         """

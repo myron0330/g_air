@@ -48,7 +48,7 @@ def calculate_indicators(symbols=None, target_date=None, dump=True, data=None):
     signal_w = calculate_signal_w(m_series=factor_m, w_series=factor_w)
     signal_w_offset_5 = calculate_signal_w(symbols=symbols, target_date=target_date, offset=-5, data=data)
     signal_d = calculate_signal_d(w_series=factor_w, d_series=factor_d)
-    signal_d_offset_1 = calculate_signal_m(symbols=symbols, target_date=target_date, offset=-1, data=data)
+    signal_d_offset_1 = calculate_signal_d(symbols=symbols, target_date=target_date, offset=-1, data=data)
 
     signal_m1 = calculate_signal_m1(ms_series=signal_m)
     signal_m2 = calculate_signal_m2(ms_series=signal_m, ms_series_offset_20=signal_m_offset_20)
