@@ -10,7 +10,7 @@ from g_air.data.database_api import (
     load_all_symbols,
     load_trading_days
 )
-from g_air.main import (
+from g_air.api import (
     calculate_indicators,
     calculate_indicators_of_date_range
 )
