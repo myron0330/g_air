@@ -6,6 +6,7 @@
 # **********************************************************************************#
 """
 import pandas as pd
+from copy import deepcopy
 from collections import OrderedDict
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from .data.database_api import *
@@ -13,7 +14,10 @@ from .calculator.factors import *
 from .calculator.signals import *
 from .const import (
     AVAILABLE_DATA_FIELDS,
-    MAX_GLOBAL_PERIODS)
+    MAX_GLOBAL_PERIODS,
+    MAX_SYMBOLS_FRAGMENT
+)
+from .utils.decorator import time_consumption
 
 
 def concurrent_processing(func):
@@ -41,8 +45,25 @@ def concurrent_processing(func):
         if args:
             essential_parameters = dict(zip(code_variable_names[:len(args)], args))
             parameters.update(essential_parameters)
+        all_symbols = parameters.get('symbols', load_all_symbols())
+        symbols_length = len(all_symbols)
+        symbol_batch = [all_symbols[index:min(index+MAX_SYMBOLS_FRAGMENT, symbols_length)] for index in range(
+            0, symbols_length, MAX_SYMBOLS_FRAGMENT)]
+        parameter_batch = list()
+        for symbols in symbol_batch:
+            current_parameters = deepcopy(parameters)
+            current_parameters['symbols'] = symbols
+            parameter_batch.append(current_parameters)
+        with ProcessPoolExecutor(8) as pool:
+            requests = [pool.submit(func, **param) for param in parameter_batch]
+            responses = [data.result() for data in as_completed(requests)]
+        return responses
+
+    return decorator
 
 
+@time_consumption
+@concurrent_processing
 def calculate_indicators(symbols=None, target_date=None, dump=True, data=None, excel_name='result.xlsx'):
     """
     Calculate indicators of symbols and target date.

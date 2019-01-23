@@ -31,7 +31,8 @@ class TestMain(TestCase):
         """
         Test calculate indicators.
         """
-        data = calculate_indicators(symbols=self.symbols, target_date=self.target_date)
+        extended_symbols = load_all_symbols()[:100]
+        data = calculate_indicators(symbols=extended_symbols, target_date=self.target_date)
         pass
 
     def test_calculate_indicators_of_date_range(self):
