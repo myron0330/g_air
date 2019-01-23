@@ -14,7 +14,7 @@ if platform.system() == "Linux":
     package_path = site.getsitepackages()[0]
 else:
     package_path = site.getsitepackages()[1]
-data_files = [(os.path.join(package_path, 'g_air/resource'), [])]
+data_files = [(os.path.join(package_path, 'g_air/resource'), list())]
 
 setup(name='g_air',
       version='1.0',
