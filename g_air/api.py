@@ -8,6 +8,7 @@
 import pandas as pd
 from copy import deepcopy
 from collections import OrderedDict
+from functools import wraps
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from .data.database_api import *
 from .calculator.factors import *
@@ -30,7 +31,7 @@ def concurrent_processing(func):
     Returns:
         function: decorator
     """
-
+    @wraps(func)
     def decorator(*args, **kwargs):
         """
         Args:
@@ -53,9 +54,12 @@ def concurrent_processing(func):
         for symbols in symbol_batch:
             current_parameters = deepcopy(parameters)
             current_parameters['symbols'] = symbols
-            parameter_batch.append(current_parameters)
+            parameter_list = list()
+            for variable in code_variable_names:
+                parameter_list.append(current_parameters.get(variable))
+            parameter_batch.append(parameter_list)
         with ProcessPoolExecutor(8) as pool:
-            requests = [pool.submit(func, **param) for param in parameter_batch]
+            requests = [pool.submit(func, *param) for param in parameter_batch]
             responses = [data.result() for data in as_completed(requests)]
         return responses
 
@@ -64,7 +68,7 @@ def concurrent_processing(func):
 
 @time_consumption
 @concurrent_processing
-def calculate_indicators(symbols=None, target_date=None, dump=True, data=None, excel_name='result.xlsx'):
+def calculate_indicators(symbols=None, target_date=None, dump=True, data=None, excel_name=None):
     """
     Calculate indicators of symbols and target date.
 
@@ -78,6 +82,7 @@ def calculate_indicators(symbols=None, target_date=None, dump=True, data=None, e
     Returns:
         pandas.DataFrame: symbol indicators frame
     """
+    excel_name = excel_name or 'result.xlsx'
     if data is None:
         trading_days = load_trading_days_with_history_periods(date=target_date, history_periods=MAX_GLOBAL_PERIODS)
         data = load_attributes_data(symbols, trading_days, attributes=AVAILABLE_DATA_FIELDS)
@@ -180,7 +185,7 @@ def calculate_indicators(symbols=None, target_date=None, dump=True, data=None, e
 
 
 def calculate_indicators_of_date_range(
-        symbol=None, target_date_range=None, dump=True, data=None, excel_name='result.xlsx'):
+        symbol=None, target_date_range=None, dump=True, data=None, excel_name=None):
     """
     Calculate indicators of a specific symbol in a target date range.
 
@@ -194,6 +199,7 @@ def calculate_indicators_of_date_range(
     Returns:
         pandas.DataFrame: symbol indicators frame
     """
+    excel_name = excel_name or 'result.xlsx'
     if data is None:
         target_date_range = sorted(target_date_range)
         start_date = target_date_range[0]

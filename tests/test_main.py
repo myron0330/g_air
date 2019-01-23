@@ -32,6 +32,7 @@ class TestMain(TestCase):
         Test calculate indicators.
         """
         extended_symbols = load_all_symbols()[:100]
+        extended_symbols = self.symbols
         data = calculate_indicators(symbols=extended_symbols, target_date=self.target_date)
         pass
 
