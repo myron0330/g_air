@@ -30,13 +30,15 @@ def calculate_indicators_of_date_slot(symbols=None, target_date=None, data=None,
         target_date(string): target date, %Y-%m-%d
         data(dict): cached data from outside
         **kwargs(**dict): key-word arguments, available as follows
-            * dump_excel(boolean): whether to dump excel
-            * excel_name(string): assign an excel name (as result.xlsx) or 'target_date'
+            * dump_excel(boolean): whether to export data as excel or not
+            * excel_name(string): assign an excel name (as result.xlsx) or 'target_date', 'symbol'
+            * dump_mysql(boolean): whether to dump data to mysql database or not
 
     Returns:
-        pandas.DataFrame: symbol indicators frame
+        pandas.Panel: symbol indicators panel, {indicator: {date: {symbol}}}
     """
     assert isinstance(kwargs, dict)
+    symbols = symbols or load_all_symbols()
     if data is None:
         trading_days = load_trading_days_with_history_periods(date=target_date, history_periods=MAX_GLOBAL_PERIODS)
         data = load_attributes_data(symbols, trading_days, attributes=AVAILABLE_DATA_FIELDS)
@@ -133,46 +135,48 @@ def calculate_indicators_of_date_slot(symbols=None, target_date=None, data=None,
     ])
     frame = pd.DataFrame(list(indicator_dict.values()), index=list(indicator_dict.keys()))
     frame = frame.reindex(columns=sorted(frame.columns))
-    return frame
+    panel = pd.Panel.from_dict({target_date: frame}).swapaxes(0, 1)
+    return panel
 
 
 @output
-def calculate_indicators_of_date_range(symbol=None, target_date_range=None, data=None, **kwargs):
+def calculate_indicators_of_date_range(symbols=None, target_date_range=None, data=None, **kwargs):
     """
     Calculate indicators of a specific symbol in a target date range.
 
     Args:
-        symbol(string): symbol name
+        symbols(string or list): symbol name list
         target_date_range(string): target date, %Y-%m-%d
         data(dict): cached data from outside
         **kwargs(**dict): key-word arguments, available as follows
-            * dump_excel(boolean): whether to dump excel
-            * excel_name(string): assign an excel name (as result.xlsx) or 'symbol'
+            * dump_excel(boolean): whether to dump excel or not
+            * excel_name(string): assign an excel name (as result.xlsx) or 'target_date', 'symbol'
+            * dump_mysql(boolean): whether to dump data to mysql database or not
 
     Returns:
-        pandas.DataFrame: symbol indicators frame
+        pandas.Panel: symbol indicators panel, {indicator: {date: {symbol}}}
     """
     assert isinstance(kwargs, dict)
+    symbols = symbols or load_all_symbols()
+    symbols = symbols.split(',') if isinstance(symbols, str) else symbols
     if data is None:
         target_date_range = sorted(target_date_range)
         start_date = target_date_range[0]
         history_trading_days = load_trading_days_with_history_periods(
             date=start_date, history_periods=MAX_GLOBAL_PERIODS)
         trading_days = history_trading_days + target_date_range[1:]
-        data = load_attributes_data([symbol], trading_days, attributes=AVAILABLE_DATA_FIELDS)
+        data = load_attributes_data(symbols, trading_days, attributes=AVAILABLE_DATA_FIELDS)
 
-    results = OrderedDict()
+    results = list()
     for target_date in target_date_range:
-        results[target_date] = calculate_indicators_of_date_slot(
-                symbols=[symbol],
+        results.append(calculate_indicators_of_date_slot(
+                symbols=symbols,
                 target_date=target_date,
-                dump_excel=False,
                 data=data
-            )
-    trading_days = results.keys()
-    frame = pd.concat(results.values(), axis=1)
-    frame.columns = trading_days
-    return frame
+            ))
+    panel = pd.concat(results, axis=1)
+    panel = panel.reindex(major_axis=sorted(panel.major_axis))
+    return panel
 
 
 @output
@@ -185,11 +189,12 @@ def calculate_indicators_of_date_slot_concurrently(symbols=None, target_date=Non
         target_date(string): target date, %Y-%m-%d
         data(dict): cached data from outside
         **kwargs(**dict): key-word arguments, available as follows
-            * dump_excel(boolean): whether to dump excel
-            * excel_name(string): assign an excel name (as result.xlsx) or 'target_date'
+            * dump_excel(boolean): whether to dump excel or not
+            * excel_name(string): assign an excel name (as result.xlsx) or 'target_date', 'symbol'
+            * dump_mysql(boolean): whether to dump data to mysql database or not
 
     Returns:
-        pandas.DataFrame: symbol indicators frame
+        pandas.Panel: symbol indicators panel, {indicator: {date: {symbol}}}
     """
     assert isinstance(kwargs, dict)
     all_symbols = symbols or load_all_symbols()
@@ -200,8 +205,9 @@ def calculate_indicators_of_date_slot_concurrently(symbols=None, target_date=Non
     with ProcessPoolExecutor(multiprocessing.cpu_count()) as pool:
         requests = [pool.submit(calculate_indicators_of_date_slot, *args) for args in args_batch]
         responses = [data.result() for data in as_completed(requests)]
-    frame = pd.concat(responses, axis=1)
-    return frame
+    panel = pd.concat(responses, axis=2)
+    panel = panel.reindex(minor_axis=sorted(panel.minor_axis))
+    return panel
 
 
 __all__ = [

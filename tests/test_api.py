@@ -47,13 +47,13 @@ class TestMain(TestCase):
         """
         # symbol = '600456.SH'
         # symbol = '603043.SH'
-        symbol = '002352.SZ'
+        symbol = ['002352.SZ', '603043.SH']
         target_date_range = load_trading_days(start='2018-12-07', end='2018-12-14')
         data = calculate_indicators_of_date_range(
-            symbol=symbol,
+            symbols=symbol,
             target_date_range=target_date_range,
             dump_excel=True,
-            excel_name='symbol'
+            # excel_name='symbol'
         )
         pass
 
