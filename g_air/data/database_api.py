@@ -31,6 +31,17 @@ def load_all_symbols():
     return result
 
 
+def load_symbols_name_map():
+    """
+    Load all symbols from cadd table.
+    """
+    with get_connection().cursor() as cursor:
+        sql = """select distinct 代码,简称 from price"""
+        cursor.execute(sql)
+        result = dict(cursor.fetchall())
+    return result
+
+
 def load_trading_days(start=None, end=None):
     """
     Load trading days from cadd table.
@@ -171,5 +182,6 @@ __all__ = [
     'load_trading_days_with_history_periods',
     'load_offset_trading_day',
     'load_attribute',
-    'load_attributes_data'
+    'load_attributes_data',
+    'load_symbols_name_map'
 ]

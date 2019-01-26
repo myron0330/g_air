@@ -6,14 +6,7 @@
 # **********************************************************************************#
 """
 from unittest import TestCase
-from g_air.data.database_api import (
-    load_all_symbols,
-    load_trading_days,
-    load_trading_days_with_history_periods,
-    load_offset_trading_day,
-    load_attribute,
-    load_attributes_data
-)
+from g_air.data.database_api import *
 from g_air.utils.decorator import time_consumption
 
 
@@ -61,7 +54,6 @@ class TestDatabaseAPI(TestCase):
         """
         Test load attribute data.
         """
-        symbols = ['000001.SZ', '600000.SH']
         trading_days = load_trading_days(start='20181201', end='20190101')
         attribute = 'scdh1'
         data = time_consumption(load_attribute)(trading_days=trading_days, attribute=attribute)
@@ -74,5 +66,15 @@ class TestDatabaseAPI(TestCase):
         symbols = ['000001.SZ', '600000.SH']
         trading_days = load_trading_days(start='20181201', end='20190101')
         data = load_attributes_data(symbols, trading_days)
+        print(data)
         # data_all = load_attributes_data(trading_days=trading_days)
         # assert data
+
+    def test_load_symbols_name_map(self):
+        """
+        Test load symbols name map.
+        """
+        symbols_name_map = load_symbols_name_map()
+        all_symbols = load_all_symbols()
+        self.assertEqual(len(symbols_name_map), len(all_symbols))
+        pass
