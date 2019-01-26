@@ -78,3 +78,15 @@ class TestDatabaseAPI(TestCase):
         all_symbols = load_all_symbols()
         self.assertEqual(len(symbols_name_map), len(all_symbols))
         pass
+
+    def test_update_table(self):
+        """
+        Test update table.
+        """
+        update_table('test3', [('a', 'b', 'c', 5.5), ('d', 'e', 'f', 8.6)])
+
+    def test_drop_table(self):
+        """
+        Test drop table.
+        """
+        drop_tables('test3')

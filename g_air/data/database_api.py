@@ -9,7 +9,8 @@ import bisect
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from .api_base import (
-    get_connection
+    get_connection,
+    ConnectionType
 )
 from ..const import (
     AVAILABLE_DATA_FIELDS,
@@ -176,6 +177,75 @@ def load_attributes_data(symbols=None, trading_days=None, attributes=None):
     return result
 
 
+def create_tables(indicators):
+    """
+    Create tables for indicators.
+
+    Args:
+        indicators(str or list): list of indicators.
+    """
+    indicators = indicators.split(',') if isinstance(indicators, str) else indicators
+    assert isinstance(indicators, list), 'Indicators must be as type list.'
+    with get_connection(ConnectionType.TARGET).cursor() as cursor:
+        cursor.execute("""show tables""")
+        tables = list(map(lambda x: x[0], cursor.fetchall()))
+        for indicator in set(indicators) - set(tables):
+            sql = """
+            create table %s
+            (
+            日期 varchar(100),
+            代码 varchar(100),
+            简称 varchar(100),
+            %s float,
+            constraint unique_key unique (日期, 代码)
+            )
+            """ % (indicator, indicator)
+            try:
+                print('create table {}'.format(indicator))
+                cursor.execute(sql)
+            except Exception as exc:
+                print(exc)
+
+
+def drop_tables(indicators):
+    """
+    Drop tables of indicators.
+
+    Args:
+        indicators(str or list): list of indicators.
+    """
+    indicators = indicators.split(',') if isinstance(indicators, str) else indicators
+    assert isinstance(indicators, list), 'Indicators must be as type list.'
+    with get_connection(ConnectionType.TARGET).cursor() as cursor:
+        cursor.execute("""show tables""")
+        tables = list(map(lambda x: x[0], cursor.fetchall()))
+        for indicator in set(indicators) & set(tables):
+            try:
+                print('drop table {}'.format(indicator))
+                cursor.execute("""drop table %s""" % indicator)
+            except Exception as exc:
+                print(exc)
+
+
+def update_table(indicator, items):
+    """
+    Update table of a specific indicator with items.
+
+    Args:
+        indicator(string): indicator name
+        items(list): list of item
+    """
+    create_tables(indicator)
+    with get_connection(ConnectionType.TARGET).cursor() as cursor:
+        sql = """insert into {}
+        (日期,代码,简称,{})
+        values (%s,%s,%s,%s)
+        on duplicate key update
+        {}=values({})""".format(*[indicator]*4)
+        cursor.executemany(sql, items)
+        cursor.connection.commit()
+
+
 __all__ = [
     'load_all_symbols',
     'load_trading_days',
@@ -183,5 +253,8 @@ __all__ = [
     'load_offset_trading_day',
     'load_attribute',
     'load_attributes_data',
-    'load_symbols_name_map'
+    'load_symbols_name_map',
+    'create_tables',
+    'update_table',
+    'drop_tables'
 ]
