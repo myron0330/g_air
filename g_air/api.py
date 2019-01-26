@@ -5,10 +5,9 @@
 #   Author: Myron
 # **********************************************************************************#
 """
+import multiprocessing
 import pandas as pd
-from copy import deepcopy
 from collections import OrderedDict
-from functools import wraps
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from .data.database_api import *
 from .calculator.factors import *
@@ -18,59 +17,12 @@ from .const import (
     MAX_GLOBAL_PERIODS,
     MAX_SYMBOLS_FRAGMENT
 )
-from .utils.decorator import time_consumption
 
 
-def concurrent_processing(func):
+def calculate_indicators_of_date_slot(
+        symbols=None, target_date=None, dump=True, data=None, excel_name=None):
     """
-    Decorator for supporting concurrent process.
-
-    Args:
-        func(function): calculator function
-
-    Returns:
-        function: decorator
-    """
-    @wraps(func)
-    def decorator(*args, **kwargs):
-        """
-        Args:
-            *args(*list): essential parameters
-            **kwargs(**dict): key-word parameters
-
-        Returns:
-            pandas.DataFrame: symbol indicators frame
-        """
-        parameters = kwargs
-        code_variable_names = func.__code__.co_varnames
-        if args:
-            essential_parameters = dict(zip(code_variable_names[:len(args)], args))
-            parameters.update(essential_parameters)
-        all_symbols = parameters.get('symbols', load_all_symbols())
-        symbols_length = len(all_symbols)
-        symbol_batch = [all_symbols[index:min(index+MAX_SYMBOLS_FRAGMENT, symbols_length)] for index in range(
-            0, symbols_length, MAX_SYMBOLS_FRAGMENT)]
-        parameter_batch = list()
-        for symbols in symbol_batch:
-            current_parameters = deepcopy(parameters)
-            current_parameters['symbols'] = symbols
-            parameter_list = list()
-            for variable in code_variable_names:
-                parameter_list.append(current_parameters.get(variable))
-            parameter_batch.append(parameter_list)
-        with ProcessPoolExecutor(8) as pool:
-            requests = [pool.submit(func, *param) for param in parameter_batch]
-            responses = [data.result() for data in as_completed(requests)]
-        return responses
-
-    return decorator
-
-
-@time_consumption
-@concurrent_processing
-def calculate_indicators(symbols=None, target_date=None, dump=True, data=None, excel_name=None):
-    """
-    Calculate indicators of symbols and target date.
+    Calculate indicators of symbols of a specific target date.
 
     Args:
         symbols(list): list of symbols
@@ -210,7 +162,7 @@ def calculate_indicators_of_date_range(
 
     results = OrderedDict()
     for target_date in target_date_range:
-        results[target_date] = calculate_indicators(
+        results[target_date] = calculate_indicators_of_date_slot(
                 symbols=[symbol],
                 target_date=target_date,
                 dump=False,
@@ -222,3 +174,38 @@ def calculate_indicators_of_date_range(
     if dump:
         frame.to_excel(excel_name, encoding='gbk')
     return frame
+
+
+def calculate_indicators_of_date_slot_concurrently(
+        symbols=None, target_date=None, dump=True, data=None, excel_name=None):
+    """
+    Calculate indicators of symbols in a specific target date with concurrent processing.
+
+    Args:
+        symbols(list): list of symbols
+        target_date(string): target date, %Y-%m-%d
+        dump(boolean): whether to dump to excel and csv files
+        data(dict): cached data from outside
+        excel_name(string): excel name
+
+    Returns:
+        pandas.DataFrame: symbol indicators frame
+    """
+    excel_name = excel_name or 'result.xlsx'
+    all_symbols = symbols or load_all_symbols()
+    symbols_length = len(all_symbols)
+    symbol_batch = [all_symbols[index:min(index+MAX_SYMBOLS_FRAGMENT, symbols_length)] for index in range(
+        0, symbols_length, MAX_SYMBOLS_FRAGMENT)]
+    args_batch = map(lambda x: [x, target_date, False, data, excel_name], symbol_batch)
+    with ProcessPoolExecutor(multiprocessing.cpu_count()) as pool:
+        requests = [pool.submit(calculate_indicators_of_date_slot, *args) for args in args_batch]
+        responses = [data.result() for data in as_completed(requests)]
+    frame = pd.concat(responses, axis=1)
+    return frame
+
+
+__all__ = [
+    'calculate_indicators_of_date_slot',
+    'calculate_indicators_of_date_range',
+    'calculate_indicators_of_date_slot_concurrently',
+]

@@ -17,7 +17,6 @@ from ..const import (
 )
 from ..utils.exceptions import Exceptions
 from ..utils.datetime import normalize_date
-from ..utils.decorator import time_consumption
 from ..const import MAX_SINGLE_FACTOR_PERIODS
 
 
@@ -138,7 +137,6 @@ def load_attribute(symbols=None, trading_days=None, attribute=None):
     return frame
 
 
-@time_consumption
 def load_attributes_data(symbols=None, trading_days=None, attributes=None):
     """
     Load attribute data from database.

@@ -6,13 +6,15 @@
 # **********************************************************************************#
 """
 from unittest import TestCase
+from datetime import datetime
 from g_air.data.database_api import (
     load_all_symbols,
     load_trading_days
 )
 from g_air.api import (
-    calculate_indicators,
-    calculate_indicators_of_date_range
+    calculate_indicators_of_date_slot,
+    calculate_indicators_of_date_range,
+    calculate_indicators_of_date_slot_concurrently
 )
 
 
@@ -22,8 +24,6 @@ class TestMain(TestCase):
         """
         initialize set up.
         """
-        extended_symbols = load_all_symbols()[:20]
-        # self.symbols = ['000001.SZ', '600000.SH'] + list(set(extended_symbols) - {'000001.SZ', '600000.SH'})
         self.symbols = ['600456.SH']
         self.target_date = '2019-01-14'
 
@@ -33,7 +33,8 @@ class TestMain(TestCase):
         """
         extended_symbols = load_all_symbols()[:100]
         extended_symbols = self.symbols
-        data = calculate_indicators(symbols=extended_symbols, target_date=self.target_date)
+        data = calculate_indicators_of_date_slot(symbols=extended_symbols, target_date=self.target_date)
+        print(data)
         pass
 
     def test_calculate_indicators_of_date_range(self):
@@ -49,3 +50,17 @@ class TestMain(TestCase):
             excel_name='.'.join([symbol, 'xlsx']),
         )
         pass
+
+    def test_calculate_indicators_of_date_slot(self):
+        """
+        Test calculate indicators of date slot.
+        """
+        extended_symbols = load_all_symbols()
+        start_time = datetime.now()
+        data_concurrent = calculate_indicators_of_date_slot_concurrently(symbols=extended_symbols, target_date=self.target_date)
+        end_time = datetime.now()
+        print('load concurrently: {}'.format(end_time - start_time))
+        start_time = datetime.now()
+        data_directly = calculate_indicators_of_date_slot(symbols=extended_symbols, target_date=self.target_date)
+        end_time = datetime.now()
+        print('load directly: {}'.format(end_time - start_time))
