@@ -31,12 +31,13 @@ class TestMain(TestCase):
         """
         Test calculate indicators.
         """
-        extended_symbols = load_all_symbols()[:5]
+        extended_symbols = load_all_symbols()[:100]
         data = calculate_indicators_of_date_slot(
             symbols=extended_symbols,
             target_date=self.target_date,
             dump_excel=True,
-            excel_name='target_date'
+            excel_name='target_date',
+            dump_mysql=True,
         )
         print(data)
         pass
@@ -53,7 +54,8 @@ class TestMain(TestCase):
             symbols=symbol,
             target_date_range=target_date_range,
             dump_excel=True,
-            # excel_name='symbol'
+            excel_name='symbol',
+            dump_mysql=True,
         )
         pass
 

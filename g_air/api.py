@@ -5,8 +5,10 @@
 #   Author: Myron
 # **********************************************************************************#
 """
+import inspect
 import multiprocessing
 import pandas as pd
+from functools import wraps
 from collections import OrderedDict
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from .data.database_api import *
@@ -17,7 +19,64 @@ from .const import (
     MAX_GLOBAL_PERIODS,
     MAX_SYMBOLS_FRAGMENT
 )
-from .utils.decorator import output
+
+
+def output(func):
+    """
+    Deal with api output.
+
+    Args:
+        func(function): target function
+
+    Returns:
+        function: function decorator
+    """
+
+    @wraps(func)
+    def _decorator(*args, **kwargs):
+        panel = func(*args, **kwargs)
+        arg_spec = inspect.getfullargspec(func)
+        arguments_list = arg_spec.args
+        arguments_default = arg_spec.defaults
+        arguments = dict(zip(arguments_list[-len(arguments_default):], arguments_default))
+        arguments.update(kwargs)
+        if args:
+            args_arguments = dict(zip(arguments_list[:len(args)], args))
+            arguments.update(args_arguments)
+        if arguments.get('dump_excel', False):
+            excel_name = arguments.get('excel_name', '{}.xlsx'.format(func.__name__))
+            if excel_name == 'symbol':
+                output_panel = panel.swapaxes(0, 2)
+                for symbol in output_panel:
+                    excel_name = '{}.xlsx'.format(symbol)
+                    output_panel[symbol].T.to_excel(excel_name, encoding='gbk')
+            elif excel_name == 'target_date':
+                output_panel = panel.swapaxes(0, 1)
+                for target_date in output_panel:
+                    excel_name = '{}.xlsx'.format(target_date)
+                    output_panel[target_date].to_excel(excel_name, encoding='gbk')
+            elif excel_name == 'indicator':
+                output_panel = panel
+                for indicator in output_panel:
+                    excel_name = '{}.xlsx'.format(indicator)
+                    output_panel[indicator].to_excel(excel_name, encoding='gbk')
+            else:
+                panel.to_excel(excel_name, encoding='gbk')
+        if arguments.get('dump_mysql', False):
+            symbols_name_map = load_symbols_name_map()
+            for indicator in panel:
+                frame = panel[indicator]
+                frame.index += ' 00:00:00'
+                all_items = list()
+                for symbol in frame.columns:
+                    symbol_name = symbols_name_map.get(symbol, symbol)
+                    series = frame.iloc[:, frame.columns.get_loc(symbol)]
+                    items = list(map(lambda x: [x[0]] + [symbol, symbol_name] + [x[1]], series.items()))
+                    all_items.extend(items)
+                update_table(indicator.strip('(n)').lower(), all_items)
+        return panel
+
+    return _decorator
 
 
 @output

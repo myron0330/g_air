@@ -177,6 +177,16 @@ def load_attributes_data(symbols=None, trading_days=None, attributes=None):
     return result
 
 
+def get_all_tables():
+    """
+    Get all tables.
+    """
+    with get_connection(ConnectionType.TARGET).cursor() as cursor:
+        cursor.execute("""show tables""")
+        tables = list(map(lambda x: x[0], cursor.fetchall()))
+    return tables
+
+
 def create_tables(indicators):
     """
     Create tables for indicators.
@@ -186,10 +196,9 @@ def create_tables(indicators):
     """
     indicators = indicators.split(',') if isinstance(indicators, str) else indicators
     assert isinstance(indicators, list), 'Indicators must be as type list.'
+    all_tables = get_all_tables()
     with get_connection(ConnectionType.TARGET).cursor() as cursor:
-        cursor.execute("""show tables""")
-        tables = list(map(lambda x: x[0], cursor.fetchall()))
-        for indicator in set(indicators) - set(tables):
+        for indicator in set(indicators) - set(all_tables):
             sql = """
             create table %s
             (
@@ -216,10 +225,9 @@ def drop_tables(indicators):
     """
     indicators = indicators.split(',') if isinstance(indicators, str) else indicators
     assert isinstance(indicators, list), 'Indicators must be as type list.'
+    all_tables = get_all_tables()
     with get_connection(ConnectionType.TARGET).cursor() as cursor:
-        cursor.execute("""show tables""")
-        tables = list(map(lambda x: x[0], cursor.fetchall()))
-        for indicator in set(indicators) & set(tables):
+        for indicator in set(indicators) & set(all_tables):
             try:
                 print('drop table {}'.format(indicator))
                 cursor.execute("""drop table %s""" % indicator)
@@ -246,6 +254,26 @@ def update_table(indicator, items):
         cursor.connection.commit()
 
 
+def delete_tables(indicators):
+    """
+    Drop tables of indicators.
+
+    Args:
+        indicators(str or list): list of indicators.
+    """
+    indicators = indicators.split(',') if isinstance(indicators, str) else indicators
+    assert isinstance(indicators, list), 'Indicators must be as type list.'
+    all_tables = get_all_tables()
+    with get_connection(ConnectionType.TARGET).cursor() as cursor:
+        for indicator in set(indicators) & set(all_tables):
+            try:
+                print('delete table {}'.format(indicator))
+                cursor.execute("""delete from %s""" % indicator)
+                cursor.connection.commit()
+            except Exception as exc:
+                print(exc)
+
+
 __all__ = [
     'load_all_symbols',
     'load_trading_days',
@@ -254,7 +282,9 @@ __all__ = [
     'load_attribute',
     'load_attributes_data',
     'load_symbols_name_map',
+    'get_all_tables',
     'create_tables',
     'update_table',
-    'drop_tables'
+    'drop_tables',
+    'delete_tables',
 ]

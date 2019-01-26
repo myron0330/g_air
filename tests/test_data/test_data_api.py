@@ -89,4 +89,11 @@ class TestDatabaseAPI(TestCase):
         """
         Test drop table.
         """
-        drop_tables('test3')
+        drop_tables(get_all_tables())
+
+    def test_delete_table(self):
+        """
+        Test delete table.
+        """
+        all_tables = get_all_tables()
+        delete_tables(all_tables)
