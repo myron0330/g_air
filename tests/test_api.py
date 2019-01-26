@@ -31,9 +31,13 @@ class TestMain(TestCase):
         """
         Test calculate indicators.
         """
-        extended_symbols = load_all_symbols()[:100]
-        extended_symbols = self.symbols
-        data = calculate_indicators_of_date_slot(symbols=extended_symbols, target_date=self.target_date)
+        extended_symbols = load_all_symbols()[:5]
+        data = calculate_indicators_of_date_slot(
+            symbols=extended_symbols,
+            target_date=self.target_date,
+            dump_excel=True,
+            excel_name='target_date'
+        )
         print(data)
         pass
 
@@ -44,10 +48,12 @@ class TestMain(TestCase):
         # symbol = '600456.SH'
         # symbol = '603043.SH'
         symbol = '002352.SZ'
-        target_date_range = load_trading_days(start='2018-12-14', end='2018-12-14')
+        target_date_range = load_trading_days(start='2018-12-07', end='2018-12-14')
         data = calculate_indicators_of_date_range(
-            symbol=symbol, target_date_range=target_date_range,
-            excel_name='.'.join([symbol, 'xlsx']),
+            symbol=symbol,
+            target_date_range=target_date_range,
+            dump_excel=True,
+            excel_name='symbol'
         )
         pass
 

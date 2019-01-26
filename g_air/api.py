@@ -17,24 +17,26 @@ from .const import (
     MAX_GLOBAL_PERIODS,
     MAX_SYMBOLS_FRAGMENT
 )
+from .utils.decorator import output
 
 
-def calculate_indicators_of_date_slot(
-        symbols=None, target_date=None, dump=True, data=None, excel_name=None):
+@output
+def calculate_indicators_of_date_slot(symbols=None, target_date=None, data=None, **kwargs):
     """
     Calculate indicators of symbols of a specific target date.
 
     Args:
         symbols(list): list of symbols
         target_date(string): target date, %Y-%m-%d
-        dump(boolean): whether to dump to excel and csv files
         data(dict): cached data from outside
-        excel_name(string): excel name
+        **kwargs(**dict): key-word arguments, available as follows
+            * dump_excel(boolean): whether to dump excel
+            * excel_name(string): assign an excel name (as result.xlsx) or 'target_date'
 
     Returns:
         pandas.DataFrame: symbol indicators frame
     """
-    excel_name = excel_name or 'result.xlsx'
+    assert isinstance(kwargs, dict)
     if data is None:
         trading_days = load_trading_days_with_history_periods(date=target_date, history_periods=MAX_GLOBAL_PERIODS)
         data = load_attributes_data(symbols, trading_days, attributes=AVAILABLE_DATA_FIELDS)
@@ -131,27 +133,26 @@ def calculate_indicators_of_date_slot(
     ])
     frame = pd.DataFrame(list(indicator_dict.values()), index=list(indicator_dict.keys()))
     frame = frame.reindex(columns=sorted(frame.columns))
-    if dump:
-        frame.to_excel(excel_name, encoding='gbk')
     return frame
 
 
-def calculate_indicators_of_date_range(
-        symbol=None, target_date_range=None, dump=True, data=None, excel_name=None):
+@output
+def calculate_indicators_of_date_range(symbol=None, target_date_range=None, data=None, **kwargs):
     """
     Calculate indicators of a specific symbol in a target date range.
 
     Args:
         symbol(string): symbol name
         target_date_range(string): target date, %Y-%m-%d
-        dump(boolean): whether to dump to excel and csv files
         data(dict): cached data from outside
-        excel_name(string): excel name
+        **kwargs(**dict): key-word arguments, available as follows
+            * dump_excel(boolean): whether to dump excel
+            * excel_name(string): assign an excel name (as result.xlsx) or 'symbol'
 
     Returns:
         pandas.DataFrame: symbol indicators frame
     """
-    excel_name = excel_name or 'result.xlsx'
+    assert isinstance(kwargs, dict)
     if data is None:
         target_date_range = sorted(target_date_range)
         start_date = target_date_range[0]
@@ -165,38 +166,37 @@ def calculate_indicators_of_date_range(
         results[target_date] = calculate_indicators_of_date_slot(
                 symbols=[symbol],
                 target_date=target_date,
-                dump=False,
+                dump_excel=False,
                 data=data
             )
     trading_days = results.keys()
     frame = pd.concat(results.values(), axis=1)
     frame.columns = trading_days
-    if dump:
-        frame.to_excel(excel_name, encoding='gbk')
     return frame
 
 
-def calculate_indicators_of_date_slot_concurrently(
-        symbols=None, target_date=None, dump=True, data=None, excel_name=None):
+@output
+def calculate_indicators_of_date_slot_concurrently(symbols=None, target_date=None, data=None, **kwargs):
     """
     Calculate indicators of symbols in a specific target date with concurrent processing.
 
     Args:
         symbols(list): list of symbols
         target_date(string): target date, %Y-%m-%d
-        dump(boolean): whether to dump to excel and csv files
         data(dict): cached data from outside
-        excel_name(string): excel name
+        **kwargs(**dict): key-word arguments, available as follows
+            * dump_excel(boolean): whether to dump excel
+            * excel_name(string): assign an excel name (as result.xlsx) or 'target_date'
 
     Returns:
         pandas.DataFrame: symbol indicators frame
     """
-    excel_name = excel_name or 'result.xlsx'
+    assert isinstance(kwargs, dict)
     all_symbols = symbols or load_all_symbols()
     symbols_length = len(all_symbols)
     symbol_batch = [all_symbols[index:min(index+MAX_SYMBOLS_FRAGMENT, symbols_length)] for index in range(
         0, symbols_length, MAX_SYMBOLS_FRAGMENT)]
-    args_batch = map(lambda x: [x, target_date, False, data, excel_name], symbol_batch)
+    args_batch = map(lambda x: [x, target_date, data], symbol_batch)
     with ProcessPoolExecutor(multiprocessing.cpu_count()) as pool:
         requests = [pool.submit(calculate_indicators_of_date_slot, *args) for args in args_batch]
         responses = [data.result() for data in as_completed(requests)]
