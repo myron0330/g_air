@@ -31,7 +31,7 @@ class TestMain(TestCase):
         """
         Test calculate indicators.
         """
-        extended_symbols = load_all_symbols()[:100]
+        extended_symbols = load_all_symbols()
         data = calculate_indicators_of_date_slot(
             symbols=extended_symbols,
             target_date=self.target_date,

@@ -7,6 +7,7 @@
 """
 import inspect
 import multiprocessing
+import numpy as np
 import pandas as pd
 from functools import wraps
 from collections import OrderedDict
@@ -71,8 +72,12 @@ def output(func):
                 for symbol in frame.columns:
                     symbol_name = symbols_name_map.get(symbol, symbol)
                     series = frame.iloc[:, frame.columns.get_loc(symbol)]
-                    items = list(map(lambda x: [x[0]] + [symbol, symbol_name] + [x[1]], series.items()))
-                    all_items.extend(items)
+                    for _ in series.items():
+                        item = [_[0], symbol, symbol_name, _[1]]
+                        if np.isnan(item[-1]):
+                            print(indicator, item)
+                            continue
+                        all_items.append(item)
                 update_table(indicator.strip('(n)').lower(), all_items)
         return panel
 
