@@ -18,7 +18,8 @@ from .calculator.signals import *
 from .const import (
     AVAILABLE_DATA_FIELDS,
     MAX_GLOBAL_PERIODS,
-    MAX_SYMBOLS_FRAGMENT
+    MAX_SYMBOLS_FRAGMENT,
+    OUTPUT_FIELDS
 )
 
 
@@ -50,15 +51,17 @@ def output(func):
                 output_panel = panel.swapaxes(0, 2)
                 for symbol in output_panel:
                     excel_name = '{}.xlsx'.format(symbol)
-                    output_panel[symbol].T.to_excel(excel_name, encoding='gbk')
+                    output_panel[symbol][OUTPUT_FIELDS].T.to_excel(excel_name, encoding='gbk')
             elif excel_name == 'target_date':
                 output_panel = panel.swapaxes(0, 1)
                 for target_date in output_panel:
                     excel_name = '{}.xlsx'.format(target_date)
-                    output_panel[target_date].to_excel(excel_name, encoding='gbk')
+                    output_panel[target_date].loc[OUTPUT_FIELDS, :].to_excel(excel_name, encoding='gbk')
             elif excel_name == 'indicator':
                 output_panel = panel
                 for indicator in output_panel:
+                    if indicator not in OUTPUT_FIELDS:
+                        continue
                     excel_name = '{}.xlsx'.format(indicator)
                     output_panel[indicator].to_excel(excel_name, encoding='gbk')
             else:
@@ -66,6 +69,8 @@ def output(func):
         if arguments.get('dump_mysql', False):
             symbols_name_map = load_symbols_name_map()
             for indicator in panel:
+                if indicator not in OUTPUT_FIELDS:
+                    continue
                 frame = panel[indicator]
                 frame.index += ' 00:00:00'
                 all_items = list()

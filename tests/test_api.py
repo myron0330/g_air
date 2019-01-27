@@ -54,7 +54,7 @@ class TestMain(TestCase):
             symbols=symbol,
             target_date_range=target_date_range,
             dump_excel=True,
-            excel_name='symbol',
+            excel_name='indicator',
             dump_mysql=True,
         )
         pass
