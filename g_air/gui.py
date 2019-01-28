@@ -5,9 +5,10 @@
 #   Author: Myron
 # **********************************************************************************#
 """
-from PyQt5.QtCore import QDateTime, Qt, QTimer
+from PyQt5.QtCore import QDateTime, Qt, QTimer, QDate
+from PyQt5.QtGui import QFont, QTextCharFormat
 from PyQt5.QtWidgets import (
-    QApplication, QCheckBox, QComboBox, QDateTimeEdit,
+    QApplication, QCheckBox, QComboBox, QDateTimeEdit, QCalendarWidget, QDateEdit,
     QDial, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit,
     QProgressBar, QPushButton, QRadioButton, QScrollBar, QSizePolicy,
     QSlider, QSpinBox, QStyleFactory, QTableWidget, QTabWidget, QTextEdit,
@@ -15,7 +16,9 @@ from PyQt5.QtWidgets import (
 
 
 class GAirGUI(QWidget):
-
+    """
+    G_Air gui.
+    """
     def __init__(self, parent=None):
         super(GAirGUI, self).__init__(parent)
         combo_box = QComboBox()
@@ -24,12 +27,14 @@ class GAirGUI(QWidget):
         style_label = QLabel("&Style:")
         style_label.setBuddy(combo_box)
 
-        self.top_left_group_box = QGroupBox("Group 1")
+        self.input_box = QGroupBox("INPUT")
+        self.top_left_group_box = QGroupBox("INPUT")
         self.top_right_group_box = QGroupBox("Group 2")
         self.bottom_left_tab_widget = QTabWidget()
         self.bottom_right_group_box = QGroupBox("Group 3")
         self.progress_bar = QProgressBar()
 
+        self.create_input_box()
         self.create_top_left_group_box()
         self.create_top_right_group_box()
         self.create_bottom_left_tab_widget()
@@ -44,19 +49,22 @@ class GAirGUI(QWidget):
 
         home_layout = QGridLayout()
         home_layout.addLayout(top_layout, 0, 0, 1, 2)
-        home_layout.addWidget(self.top_left_group_box, 1, 0)
-        home_layout.addWidget(self.top_right_group_box, 1, 1)
-        home_layout.addWidget(self.bottom_left_tab_widget, 2, 0)
-        home_layout.addWidget(self.bottom_right_group_box, 2, 1)
-        home_layout.addWidget(self.progress_bar, 3, 0, 1, 2)
+        home_layout.addWidget(self.input_box, 1, 0, 1, 1)
+        home_layout.addWidget(self.top_left_group_box, 2, 0)
+        home_layout.addWidget(self.top_right_group_box, 2, 1)
+        home_layout.addWidget(self.bottom_left_tab_widget, 3, 0)
+        home_layout.addWidget(self.bottom_right_group_box, 3, 1)
+        home_layout.addWidget(self.progress_bar, 4, 0, 1, 2)
         home_layout.setRowStretch(1, 1)
         home_layout.setRowStretch(2, 1)
         home_layout.setColumnStretch(0, 1)
         home_layout.setColumnStretch(1, 1)
         self.setLayout(home_layout)
-        self.setWindowTitle("G_Air signal widget")
-        self.change_style('Fusion')
+
+        self.setWindowTitle("G_Air Signal Widget")
+        self.change_style()
         self.setGeometry(400, 400, 300, 260)
+        self.resize(2000, 2000)
 
     @staticmethod
     def change_style(style_name='Fusion'):
@@ -71,14 +79,36 @@ class GAirGUI(QWidget):
         QApplication.setStyle(QStyleFactory.create(style_name))
         QApplication.setPalette(QApplication.style().standardPalette())
 
+    def create_input_box(self):
+        """
+        Create calendar box.
+        """
+        input_layout = QGridLayout()
+        start_date_label = QLabel('Start Date')
+        start_date_edit = QDateEdit()
+        start_date_edit.setDisplayFormat('yyyy-mm-dd')
+        input_layout.addWidget(start_date_label, 0, 0, 1, 1)
+        input_layout.addWidget(start_date_edit, 0, 1, 1, 2)
+        input_layout.addWidget(QLabel(), 0, 3, 1, 3)
+
+        end_date_label = QLabel('End Date')
+        end_date_edit = QDateEdit()
+        end_date_edit.setDisplayFormat('yyyy-mm-dd')
+        input_layout.addWidget(end_date_label, 1, 0, 1, 1)
+        input_layout.addWidget(end_date_edit, 1, 1, 1, 2)
+        input_layout.addWidget(QLabel(), 1, 3, 1, 1)
+
+        input_layout.addWidget(QLabel(), 2, 3, 3, 3)
+
+        self.input_box.setLayout(input_layout)
+
     def create_top_left_group_box(self):
         """
         Create top left group box.
         """
-        radio_button_1 = QRadioButton("Radio button 1")
+        radio_button_1 = QDateEdit()
         radio_button_2 = QRadioButton("Radio button 2")
         radio_button_3 = QRadioButton("Radio button 3")
-        radio_button_1.setChecked(True)
         check_box = QCheckBox("Tri-state check box")
         check_box.setTristate(True)
         check_box.setCheckState(Qt.PartiallyChecked)
