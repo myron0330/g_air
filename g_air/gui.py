@@ -5,14 +5,17 @@
 #   Author: Myron
 # **********************************************************************************#
 """
+from datetime import datetime
 from PyQt5.QtCore import QDateTime, Qt, QTimer, QDate
-from PyQt5.QtGui import QFont, QTextCharFormat
 from PyQt5.QtWidgets import (
     QApplication, QCheckBox, QComboBox, QDateTimeEdit, QCalendarWidget, QDateEdit,
     QDial, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit,
     QProgressBar, QPushButton, QRadioButton, QScrollBar, QSizePolicy,
     QSlider, QSpinBox, QStyleFactory, QTableWidget, QTabWidget, QTextEdit,
     QVBoxLayout, QWidget)
+
+
+TIME_FORMAT = 'yyyy-MM-dd'
 
 
 class GAirGUI(QWidget):
@@ -86,14 +89,16 @@ class GAirGUI(QWidget):
         input_layout = QGridLayout()
         start_date_label = QLabel('Start Date')
         start_date_edit = QDateEdit()
-        start_date_edit.setDisplayFormat('yyyy-mm-dd')
+        start_date_edit.setDisplayFormat(TIME_FORMAT)
+        start_date_edit.setDate(QDate.fromString(datetime.today().strftime('%Y-%m-%d'), TIME_FORMAT))
         input_layout.addWidget(start_date_label, 0, 0, 1, 1)
         input_layout.addWidget(start_date_edit, 0, 1, 1, 2)
         input_layout.addWidget(QLabel(), 0, 3, 1, 3)
 
         end_date_label = QLabel('End Date')
         end_date_edit = QDateEdit()
-        end_date_edit.setDisplayFormat('yyyy-mm-dd')
+        end_date_edit.setDisplayFormat(TIME_FORMAT)
+        end_date_edit.setDate(QDate.fromString(datetime.today().strftime('%Y-%m-%d'), TIME_FORMAT))
         input_layout.addWidget(end_date_label, 1, 0, 1, 1)
         input_layout.addWidget(end_date_edit, 1, 1, 1, 2)
         input_layout.addWidget(QLabel(), 1, 3, 1, 1)
