@@ -30,6 +30,9 @@ class GAirGUI(QWidget):
         style_label = QLabel("&Style:")
         style_label.setBuddy(combo_box)
 
+        self.start_date = QDateEdit()
+        self.end_date = QDateEdit()
+
         self.input_box = QGroupBox("INPUT")
         self.top_left_group_box = QGroupBox("INPUT")
         self.top_right_group_box = QGroupBox("Group 2")
@@ -88,23 +91,19 @@ class GAirGUI(QWidget):
         """
         input_layout = QGridLayout()
         start_date_label = QLabel('Start Date')
-        start_date_edit = QDateEdit()
-        start_date_edit.setDisplayFormat(TIME_FORMAT)
-        start_date_edit.setDate(QDate.fromString(datetime.today().strftime('%Y-%m-%d'), TIME_FORMAT))
+        self.start_date.setDisplayFormat(TIME_FORMAT)
+        self.start_date.setDate(QDate.fromString(datetime.today().strftime('%Y-%m-%d'), TIME_FORMAT))
         input_layout.addWidget(start_date_label, 0, 0, 1, 1)
-        input_layout.addWidget(start_date_edit, 0, 1, 1, 2)
+        input_layout.addWidget(self.start_date, 0, 1, 1, 2)
         input_layout.addWidget(QLabel(), 0, 3, 1, 3)
 
         end_date_label = QLabel('End Date')
-        end_date_edit = QDateEdit()
-        end_date_edit.setDisplayFormat(TIME_FORMAT)
-        end_date_edit.setDate(QDate.fromString(datetime.today().strftime('%Y-%m-%d'), TIME_FORMAT))
+        self.end_date.setDisplayFormat(TIME_FORMAT)
+        self.end_date.setDate(QDate.fromString(datetime.today().strftime('%Y-%m-%d'), TIME_FORMAT))
         input_layout.addWidget(end_date_label, 1, 0, 1, 1)
-        input_layout.addWidget(end_date_edit, 1, 1, 1, 2)
+        input_layout.addWidget(self.end_date, 1, 1, 1, 2)
         input_layout.addWidget(QLabel(), 1, 3, 1, 1)
-
         input_layout.addWidget(QLabel(), 2, 3, 3, 3)
-
         self.input_box.setLayout(input_layout)
 
     def create_top_left_group_box(self):
