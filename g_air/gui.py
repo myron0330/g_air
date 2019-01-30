@@ -26,7 +26,8 @@ class GAirGUI(QWidget):
         super(GAirGUI, self).__init__(parent)
         self.start_date_edit = QDateEdit()
         self.end_date_edit = QDateEdit()
-        self.symbols_edit = QTabWidget()
+        self.symbols_edit = QTextEdit()
+        self.symbols_widget = QTabWidget()
         self.progress_bar = QProgressBar()
 
         self.input_box = QGroupBox('INPUT')
@@ -84,7 +85,7 @@ class GAirGUI(QWidget):
         symbols_label = QLabel('Symbols')
         self._initialize_symbols_edit_widget()
         input_layout.addWidget(symbols_label, 2, 0, 1, 1)
-        input_layout.addWidget(self.symbols_edit)
+        input_layout.addWidget(self.symbols_widget)
 
         self.input_box.setLayout(input_layout)
 
@@ -178,15 +179,15 @@ class GAirGUI(QWidget):
         """
         Initialize symbols edit widget.
         """
-        self.symbols_edit.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Ignored)
+        self.symbols_widget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Ignored)
         symbols_edit = QWidget()
-        text_edit = QTextEdit()
-        text_edit.setPlainText('000001.SH, 600000.SZ')
+        self.symbols_edit.setPlainText('000001.SH, 600000.SZ')
+        self.symbols_edit.textChanged.connect(self._event_symbols_changed)
         symbols_edit_layout = QHBoxLayout()
         symbols_edit_layout.setContentsMargins(5, 5, 5, 5)
-        symbols_edit_layout.addWidget(text_edit)
+        symbols_edit_layout.addWidget(self.symbols_edit)
         symbols_edit.setLayout(symbols_edit_layout)
-        self.symbols_edit.addTab(symbols_edit, 'Edit Text')
+        self.symbols_widget.addTab(symbols_edit, 'Edit Text')
 
     def _initialize_date_edit_widget(self, date_edit):
         """
@@ -207,6 +208,14 @@ class GAirGUI(QWidget):
         """
         Date changed event process.
         """
+        print(self.start_date_edit.date().toString(TIME_FORMAT), self.end_date_edit.date().toString(TIME_FORMAT))
+        return
+
+    def _event_symbols_changed(self):
+        """
+        Symbols changed event process.
+        """
+        print(self.symbols_edit.document().toPlainText())
         return
 
 
