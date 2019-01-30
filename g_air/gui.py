@@ -24,41 +24,22 @@ class GAirGUI(QWidget):
     """
     def __init__(self, parent=None):
         super(GAirGUI, self).__init__(parent)
-        combo_box = QComboBox()
-        combo_box.addItems(QStyleFactory.keys())
-
-        style_label = QLabel('&Style:')
-        style_label.setBuddy(combo_box)
-
         self.start_date_edit = QDateEdit()
         self.end_date_edit = QDateEdit()
-
-        self.date_input_box = QGroupBox('DATE INPUT')
-        self.function_key_box = QGroupBox('FUNCTION KEYS')
-        self.symbol_input_box = QGroupBox('SYMBOL INPUT')
-        self.bottom_left_tab_widget = QTabWidget()
-        self.bottom_right_group_box = QGroupBox('Group 3')
+        self.symbols_edit = QTabWidget()
         self.progress_bar = QProgressBar()
+
+        self.input_box = QGroupBox('INPUT')
+        self.function_key_box = QGroupBox('FUNCTION KEYS')
 
         self.create_input_box()
         self.create_function_key_box()
-        self.create_bottom_left_tab_widget()
-        self.create_bottom_right_group_box()
         self.create_progress_bar()
-        combo_box.activated[str].connect(self.change_style)
-
-        top_layout = QHBoxLayout()
-        top_layout.addWidget(style_label)
-        top_layout.addWidget(combo_box)
-        top_layout.addStretch(1)
 
         home_layout = QGridLayout()
-        home_layout.addLayout(top_layout, 0, 0, 1, 2)
-        home_layout.addWidget(self.date_input_box, 1, 0, 1, 1)
+        home_layout.addWidget(self.input_box, 1, 0, 1, 1)
         home_layout.addWidget(self.function_key_box, 2, 0, 1, 1)
-        home_layout.addWidget(self.bottom_left_tab_widget, 1, 1, 2, 1)
-        # home_layout.addWidget(self.bottom_right_group_box, 3, 1)
-        home_layout.addWidget(self.progress_bar, 4, 0, 1, 2)
+        home_layout.addWidget(self.progress_bar, 3, 0, 1, 1)
         home_layout.setRowStretch(1, 1)
         home_layout.setRowStretch(2, 1)
         home_layout.setColumnStretch(0, 1)
@@ -89,40 +70,23 @@ class GAirGUI(QWidget):
         """
         input_layout = QGridLayout()
         start_date_label = QLabel('Start Date')
-        self.start_date_edit.setDisplayFormat(TIME_FORMAT)
-        self.start_date_edit.setDate(QDate.fromString(datetime.today().strftime('%Y-%m-%d'), TIME_FORMAT))
-        self.start_date_edit.dateChanged.connect(self.date_changed_event)
+        self.start_date_edit = self._initialize_date_edit_widget(self.start_date_edit)
         input_layout.addWidget(start_date_label, 0, 0, 1, 1)
         input_layout.addWidget(self.start_date_edit, 0, 1, 1, 2)
         input_layout.addWidget(QLabel(), 0, 3, 1, 3)
 
         end_date_label = QLabel('End Date')
-        self.end_date_edit.setDisplayFormat(TIME_FORMAT)
-        self.end_date_edit.setDate(QDate.fromString(datetime.today().strftime('%Y-%m-%d'), TIME_FORMAT))
-        self.end_date_edit.dateChanged.connect(self.date_changed_event)
+        self.end_date_edit = self._initialize_date_edit_widget(self.end_date_edit)
         input_layout.addWidget(end_date_label, 1, 0, 1, 1)
         input_layout.addWidget(self.end_date_edit, 1, 1, 1, 2)
-        input_layout.addWidget(QLabel(), 1, 3, 1, 1)
-        input_layout.addWidget(QLabel(), 2, 3, 3, 3)
-        self.date_input_box.setLayout(input_layout)
+        input_layout.addWidget(QLabel(), 1, 3, 1, 3)
 
-    # def create_top_left_group_box(self):
-    #     """
-    #     Create top left group box.
-    #     """
-    #     radio_button_1 = QDateEdit()
-    #     radio_button_2 = QRadioButton('Radio button 2')
-    #     radio_button_3 = QRadioButton('Radio button 3')
-    #     check_box = QCheckBox('Tri-state check box')
-    #     check_box.setTristate(True)
-    #     check_box.setCheckState(Qt.PartiallyChecked)
-    #     layout = QVBoxLayout()
-    #     layout.addWidget(radio_button_1)
-    #     layout.addWidget(radio_button_2)
-    #     layout.addWidget(radio_button_3)
-    #     layout.addWidget(check_box)
-    #     layout.addStretch(1)
-    #     self.top_left_group_box.setLayout(layout)
+        symbols_label = QLabel('Symbols')
+        self._initialize_symbols_edit_widget()
+        input_layout.addWidget(symbols_label, 2, 0, 1, 1)
+        input_layout.addWidget(self.symbols_edit)
+
+        self.input_box.setLayout(input_layout)
 
     def create_function_key_box(self):
         """
@@ -143,39 +107,6 @@ class GAirGUI(QWidget):
         layout.addWidget(flat_push_button)
         layout.addStretch(1)
         self.function_key_box.setLayout(layout)
-
-    def create_bottom_left_tab_widget(self):
-        """
-        Create bottom left group box.
-        """
-        self.bottom_left_tab_widget.setSizePolicy(QSizePolicy.Preferred,
-                                                  QSizePolicy.Ignored)
-
-        tab1 = QWidget()
-        table_widget = QTableWidget(10, 10)
-
-        tab1_h_box = QHBoxLayout()
-        tab1_h_box.setContentsMargins(5, 5, 5, 5)
-        tab1_h_box.addWidget(table_widget)
-        tab1.setLayout(tab1_h_box)
-
-        tab2 = QWidget()
-        text_edit = QTextEdit()
-
-        text_edit.setPlainText('Twinkle, twinkle, little star,\n'
-                              'How I wonder what you are.\n' 
-                              'Up above the world so high,\n'
-                              'Like a diamond in the sky.\n'
-                              'Twinkle, twinkle, little star,\n' 
-                              'How I wonder what you are!\n')
-
-        tab2_h_box = QHBoxLayout()
-        tab2_h_box.setContentsMargins(5, 5, 5, 5)
-        tab2_h_box.addWidget(text_edit)
-        tab2.setLayout(tab2_h_box)
-
-        self.bottom_left_tab_widget.addTab(tab1, '&Table')
-        self.bottom_left_tab_widget.addTab(tab2, 'Text &Edit')
 
     def create_bottom_right_group_box(self):
         """
@@ -233,9 +164,38 @@ class GAirGUI(QWidget):
         max_value = self.progress_bar.maximum()
         self.progress_bar.setValue(int(current_value + (max_value - current_value) / 100))
 
-    def date_changed_event(self):
+    def _initialize_symbols_edit_widget(self):
         """
-        Date changed event.
+        Initialize symbols edit widget.
+        """
+        self.symbols_edit.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Ignored)
+        symbols_edit = QWidget()
+        text_edit = QTextEdit()
+        text_edit.setPlainText('000001.SH, 600000.SZ')
+        symbols_edit_layout = QHBoxLayout()
+        symbols_edit_layout.setContentsMargins(5, 5, 5, 5)
+        symbols_edit_layout.addWidget(text_edit)
+        symbols_edit.setLayout(symbols_edit_layout)
+        self.symbols_edit.addTab(symbols_edit, 'Edit Text')
+
+    def _initialize_date_edit_widget(self, date_edit):
+        """
+        Create date edit widget.
+
+        Args:
+            date_edit(QDateEdit): date edit instance
+
+        Returns:
+            QDateEdit: initialized date edit instance
+        """
+        date_edit.setDisplayFormat(TIME_FORMAT)
+        date_edit.setDate(QDate.fromString(datetime.today().strftime('%Y-%m-%d'), TIME_FORMAT))
+        date_edit.dateChanged.connect(self._event_date_changed)
+        return date_edit
+
+    def _event_date_changed(self):
+        """
+        Date changed event process.
         """
         return
 
