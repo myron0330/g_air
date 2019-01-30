@@ -99,7 +99,7 @@ class GAirGUI(QWidget):
         input_layout.addWidget(QLabel(), 0, 3, 1, 3)
 
         end_date_label = QLabel('End Date')
-        self.end_date_edit = self._initialize_date_edit_widget(self.end_date_edit)
+        self.end_date_edit = self._initialize_date_edit_widget(self.end_date_edit, date_type='end')
         input_layout.addWidget(end_date_label, 1, 0, 1, 1)
         input_layout.addWidget(self.end_date_edit, 1, 1, 1, 2)
         input_layout.addWidget(QLabel(), 1, 3, 1, 3)
@@ -211,7 +211,7 @@ class GAirGUI(QWidget):
         symbols_edit.setLayout(symbols_edit_layout)
         self.symbols_widget.addTab(symbols_edit, 'Edit Text')
 
-    def _initialize_date_edit_widget(self, date_edit):
+    def _initialize_date_edit_widget(self, date_edit, date_type='start'):
         """
         Create date edit widget.
 
@@ -223,15 +223,25 @@ class GAirGUI(QWidget):
         """
         date_edit.setDisplayFormat(TIME_FORMAT)
         date_edit.setDate(QDate.fromString(datetime.today().strftime('%Y-%m-%d'), TIME_FORMAT))
-        date_edit.dateChanged.connect(self._event_date_changed)
+        if date_type == 'start':
+            date_edit.dateChanged.connect(self._event_start_date_changed)
+        else:
+            date_edit.dateChanged.connect(self._event_end_date_changed)
         return date_edit
 
-    def _event_date_changed(self):
+    def _event_start_date_changed(self):
         """
-        Date changed event process.
+        Start Date changed event process.
         """
-        print(self.start_date, self.end_date)
-        return
+        if self.start_date > self.end_date:
+            self.end_date_edit.setDate(self.start_date_edit.date())
+
+    def _event_end_date_changed(self):
+        """
+        End Date changed event process.
+        """
+        if self.start_date > self.end_date:
+            self.start_date_edit.setDate(self.end_date_edit.date())
 
     def _event_symbols_changed(self):
         """
