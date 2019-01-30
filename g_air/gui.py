@@ -66,7 +66,7 @@ class GAirGUI(QWidget):
 
     def create_input_box(self):
         """
-        Create calendar box.
+        Create input box.
         """
         input_layout = QGridLayout()
         start_date_label = QLabel('Start Date')
@@ -92,19 +92,29 @@ class GAirGUI(QWidget):
         """
         Create function key box.
         """
-        default_push_button = QPushButton('Default Push Button')
-        default_push_button.setDefault(True)
+        database_box = QGroupBox('DataBase')
+        database_layout = QVBoxLayout()
+        database_update_button = QPushButton('Update')
+        database_update_button.setDefault(True)
+        database_remove_button = QPushButton('Remove')
+        database_remove_button.setDefault(True)
+        database_layout.addWidget(database_update_button)
+        database_layout.addWidget(database_remove_button)
+        database_box.setLayout(database_layout)
 
-        toggle_push_button = QPushButton('Toggle Push Button')
-        toggle_push_button.setCheckable(True)
-        toggle_push_button.setChecked(True)
+        local_files_box = QGroupBox('Local files')
+        local_files_layout = QVBoxLayout()
+        local_files_console_output_button = QPushButton('Console Output')
+        local_files_console_output_button.setDefault(True)
+        local_files_download_button = QPushButton('Download')
+        local_files_download_button.setDefault(True)
+        local_files_layout.addWidget(local_files_console_output_button)
+        local_files_layout.addWidget(local_files_download_button)
+        local_files_box.setLayout(local_files_layout)
 
-        flat_push_button = QPushButton('Flat Push Button')
-        flat_push_button.setFlat(True)
         layout = QVBoxLayout()
-        layout.addWidget(default_push_button)
-        layout.addWidget(toggle_push_button)
-        layout.addWidget(flat_push_button)
+        layout.addWidget(database_box)
+        layout.addWidget(local_files_box)
         layout.addStretch(1)
         self.function_key_box.setLayout(layout)
 
