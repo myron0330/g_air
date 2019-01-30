@@ -52,6 +52,28 @@ class GAirGUI(QWidget):
         self.setGeometry(400, 400, 300, 260)
         self.resize(800, 800)
 
+    @property
+    def start_date(self):
+        """
+        Start date.
+        """
+        return self.start_date_edit.date().toString(TIME_FORMAT)
+
+    @property
+    def end_date(self):
+        """
+        End date.
+        """
+        return self.end_date_edit.date().toString(TIME_FORMAT)
+
+    @property
+    def symbols(self):
+        """
+        Symbols.
+        """
+        text = self.symbols_edit.document().toPlainText()
+        return list(filter(lambda x: x is not '', map(lambda x: x.strip(), text.split(','))))
+
     @staticmethod
     def change_style(style_name='Fusion'):
         """
@@ -208,14 +230,14 @@ class GAirGUI(QWidget):
         """
         Date changed event process.
         """
-        print(self.start_date_edit.date().toString(TIME_FORMAT), self.end_date_edit.date().toString(TIME_FORMAT))
+        print(self.start_date, self.end_date)
         return
 
     def _event_symbols_changed(self):
         """
         Symbols changed event process.
         """
-        print(self.symbols_edit.document().toPlainText())
+        print(self.symbols)
         return
 
 
