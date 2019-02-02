@@ -192,7 +192,7 @@ def create_tables(indicators):
     Create tables for indicators.
 
     Args:
-        indicators(str or list): list of indicators.
+        indicators(string or list): list of indicators.
     """
     indicators = indicators.split(',') if isinstance(indicators, str) else indicators
     assert isinstance(indicators, list), 'Indicators must be as type list.'
@@ -221,7 +221,7 @@ def drop_tables(indicators):
     Drop tables of indicators.
 
     Args:
-        indicators(str or list): list of indicators.
+        indicators(string or list): list of indicators.
     """
     indicators = indicators.split(',') if isinstance(indicators, str) else indicators
     assert isinstance(indicators, list), 'Indicators must be as type list.'
@@ -259,7 +259,7 @@ def delete_tables(indicators):
     Drop tables of indicators.
 
     Args:
-        indicators(str or list): list of indicators.
+        indicators(string or list): list of indicators.
     """
     indicators = indicators.split(',') if isinstance(indicators, str) else indicators
     assert isinstance(indicators, list), 'Indicators must be as type list.'
@@ -269,6 +269,33 @@ def delete_tables(indicators):
             try:
                 print('delete table {}'.format(indicator))
                 cursor.execute("""delete from %s""" % indicator)
+                cursor.connection.commit()
+            except Exception as exc:
+                print(exc)
+
+
+def delete_items_(start_date, end_date, symbols=None, indicators=None):
+    """
+    Delete items from mysql.
+
+    Args:
+        start_date(string): start date
+        end_date(string): end date
+        symbols(list or None): list of symbols
+        indicators(str or list or None): indicators
+    """
+    all_tables = get_all_tables()
+    indicators = indicators or all_tables
+    indicators = indicators.split(',') if isinstance(indicators, str) else indicators
+    assert isinstance(indicators, list), 'Indicators must be as type list.'
+    with get_connection(ConnectionType.TARGET).cursor() as cursor:
+        for indicator in set(indicators) & set(all_tables):
+            try:
+                symbol_condition = """ and 代码 in ({})""".format(','.join(
+                    map(lambda x: '\"{}\"'.format(x), tuple(symbols)))) if symbols else """"""
+                sql = """delete from {} where substr(日期, 1, 10) >= '{}' and substr(日期, 1, 10) <= '{}'{}""".format(
+                    indicator, start_date, end_date, symbol_condition)
+                cursor.execute(sql)
                 cursor.connection.commit()
             except Exception as exc:
                 print(exc)
@@ -287,4 +314,5 @@ __all__ = [
     'update_table',
     'drop_tables',
     'delete_tables',
+    'delete_items_'
 ]

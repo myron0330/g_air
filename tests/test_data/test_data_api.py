@@ -97,3 +97,15 @@ class TestDatabaseAPI(TestCase):
         """
         all_tables = get_all_tables()
         delete_tables(all_tables)
+
+    def test_delete_items(self):
+        """
+        Test delete items.
+        """
+        start_date = '2018-01-11'
+        end_date = '2018-12-25'
+        symbols = ['603043.SH']
+        symbols = None
+        # indicators = ['wz']
+        indicators = None
+        delete_items_(start_date, end_date, symbols=symbols, indicators=indicators)
