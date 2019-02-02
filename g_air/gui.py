@@ -265,10 +265,13 @@ class GAirGUI(QWidget):
         Update database event process.
         """
         target_date_range = load_trading_days(start=self.start_date, end=self.end_date)
-        calculate_indicators_of_date_range(
-            symbols=self.symbols,
-            target_date_range=target_date_range,
-            dump_mysql=True)
+        if target_date_range:
+            calculate_indicators_of_date_range(
+                symbols=self.symbols,
+                target_date_range=target_date_range,
+                dump_mysql=True)
+        else:
+            print('no valid target dates.')
 
     def _event_delete_database(self):
         """
