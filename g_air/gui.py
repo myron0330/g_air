@@ -16,6 +16,7 @@ from PyQt5.QtWidgets import (
 
 
 TIME_FORMAT = 'yyyy-MM-dd'
+ALL_SYMBOLS = 'All'
 
 
 class GAirGUI(QWidget):
@@ -72,7 +73,10 @@ class GAirGUI(QWidget):
         Symbols.
         """
         text = self.symbols_edit.document().toPlainText()
-        return list(filter(lambda x: x is not '', map(lambda x: x.strip(), text.split(','))))
+        if self.symbols_edit.isEnabled():
+            return list(filter(lambda x: x is not '', map(lambda x: x.strip(), text.split(','))))
+        else:
+            return ALL_SYMBOLS
 
     @staticmethod
     def change_style(style_name='Fusion'):
@@ -204,9 +208,13 @@ class GAirGUI(QWidget):
         self.symbols_widget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Ignored)
         symbols_edit = QWidget()
         self.symbols_edit.setPlainText('000001.SH, 600000.SZ')
-        self.symbols_edit.textChanged.connect(self._event_symbols_changed)
-        symbols_edit_layout = QHBoxLayout()
+
+        full_stock_check_box = QCheckBox(ALL_SYMBOLS)
+        full_stock_check_box.toggled.connect(self.symbols_edit.setDisabled)
+
+        symbols_edit_layout = QVBoxLayout()
         symbols_edit_layout.setContentsMargins(5, 5, 5, 5)
+        symbols_edit_layout.addWidget(full_stock_check_box)
         symbols_edit_layout.addWidget(self.symbols_edit)
         symbols_edit.setLayout(symbols_edit_layout)
         self.symbols_widget.addTab(symbols_edit, 'Edit Text')
@@ -242,13 +250,6 @@ class GAirGUI(QWidget):
         """
         if self.start_date > self.end_date:
             self.start_date_edit.setDate(self.end_date_edit.date())
-
-    def _event_symbols_changed(self):
-        """
-        Symbols changed event process.
-        """
-        print(self.symbols)
-        return
 
 
 if __name__ == '__main__':
