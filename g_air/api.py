@@ -214,7 +214,7 @@ def calculate_indicators_of_date_range(symbols=None, target_date_range=None, dat
     Calculate indicators of a specific symbol in a target date range.
 
     Args:
-        symbols(string or list): symbol name list
+        symbols(string or list or None): symbol name list
         target_date_range(string): target date, %Y-%m-%d
         data(dict): cached data from outside
         **kwargs(**dict): key-word arguments, available as follows

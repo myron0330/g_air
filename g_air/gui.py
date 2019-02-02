@@ -13,7 +13,8 @@ from PyQt5.QtWidgets import (
     QProgressBar, QPushButton, QRadioButton, QScrollBar, QSizePolicy,
     QSlider, QSpinBox, QStyleFactory, QTableWidget, QTabWidget, QTextEdit,
     QVBoxLayout, QWidget)
-
+from g_air.data.database_api import *
+from g_air.api import calculate_indicators_of_date_range
 
 TIME_FORMAT = 'yyyy-MM-dd'
 ALL_SYMBOLS = 'All'
@@ -123,10 +124,12 @@ class GAirGUI(QWidget):
         database_layout = QVBoxLayout()
         database_update_button = QPushButton('Update')
         database_update_button.setDefault(True)
-        database_remove_button = QPushButton('Remove')
-        database_remove_button.setDefault(True)
+        database_update_button.clicked.connect(self._event_update_database)
+        database_delete_button = QPushButton('Delete')
+        database_delete_button.setDefault(True)
+        database_delete_button.clicked.connect(self._event_delete_database)
         database_layout.addWidget(database_update_button)
-        database_layout.addWidget(database_remove_button)
+        database_layout.addWidget(database_delete_button)
         database_box.setLayout(database_layout)
 
         local_files_box = QGroupBox('Local files')
@@ -207,7 +210,7 @@ class GAirGUI(QWidget):
         """
         self.symbols_widget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Ignored)
         symbols_edit = QWidget()
-        self.symbols_edit.setPlainText('000001.SH, 600000.SZ')
+        self.symbols_edit.setPlainText('000001.SZ, 600000.SH')
         self.symbols_edit.textChanged.connect(self._event_symbols_changed)
         full_stock_check_box = QCheckBox(ALL_SYMBOLS)
         full_stock_check_box.toggled.connect(self.symbols_edit.setDisabled)
@@ -256,6 +259,22 @@ class GAirGUI(QWidget):
         Symbols changed event process.
         """
         print(self.symbols, type(self.symbols))
+
+    def _event_update_database(self):
+        """
+        Update database event process.
+        """
+        target_date_range = load_trading_days(start=self.start_date, end=self.end_date)
+        calculate_indicators_of_date_range(
+            symbols=self.symbols,
+            target_date_range=target_date_range,
+            dump_mysql=True)
+
+    def _event_delete_database(self):
+        """
+        Delete database items event process.
+        """
+        delete_items_(self.start_date, self.end_date, symbols=self.symbols)
 
 
 if __name__ == '__main__':
