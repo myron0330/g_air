@@ -5,6 +5,7 @@
 #   Author: Myron
 # **********************************************************************************#
 """
+import logging
 from datetime import datetime
 from PyQt5.QtCore import QDateTime, Qt, QTimer, QDate
 from PyQt5.QtWidgets import (
@@ -12,12 +13,27 @@ from PyQt5.QtWidgets import (
     QDial, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit,
     QProgressBar, QPushButton, QRadioButton, QScrollBar, QSizePolicy,
     QSlider, QSpinBox, QStyleFactory, QTableWidget, QTabWidget, QTextEdit,
-    QVBoxLayout, QWidget)
+    QVBoxLayout, QWidget, QPlainTextEdit, QDialog)
 from g_air.data.database_api import *
 from g_air.api import calculate_indicators_of_date_range
 
+
 TIME_FORMAT = 'yyyy-MM-dd'
 ALL_SYMBOLS = 'All'
+
+
+class QPlainTextEditLogger(logging.Handler):
+    """
+    QPlainTextEditLogger.
+    """
+    def __init__(self, parent):
+        super(QPlainTextEditLogger, self).__init__(parent)
+        self.widget = QPlainTextEdit(parent)
+        self.widget.setReadOnly(True)
+
+    def emit(self, record):
+        msg = self.format(record)
+        self.widget.appendPlainText(msg)
 
 
 class GAirGUI(QWidget):
@@ -30,19 +46,20 @@ class GAirGUI(QWidget):
         self.end_date_edit = QDateEdit()
         self.symbols_edit = QTextEdit()
         self.symbols_widget = QTabWidget()
+        self.log_edit = QDialog()
         self.progress_bar = QProgressBar()
 
         self.input_box = QGroupBox('INPUT')
         self.function_key_box = QGroupBox('FUNCTION KEYS')
-
+        self.log_box = QGroupBox('LOG CONSOLE')
         self.create_input_box()
         self.create_function_key_box()
-        self.create_progress_bar()
+        self.create_log_box()
 
         home_layout = QGridLayout()
         home_layout.addWidget(self.input_box, 1, 0, 1, 1)
         home_layout.addWidget(self.function_key_box, 2, 0, 1, 1)
-        home_layout.addWidget(self.progress_bar, 3, 0, 1, 1)
+        home_layout.addWidget(self.log_box, 1, 1, 2, 1)
         home_layout.setRowStretch(1, 1)
         home_layout.setRowStretch(2, 1)
         home_layout.setColumnStretch(0, 1)
@@ -132,21 +149,53 @@ class GAirGUI(QWidget):
         database_layout.addWidget(database_delete_button)
         database_box.setLayout(database_layout)
 
+        console_output_box = QGroupBox('Console output')
+        console_output_layout = QVBoxLayout()
+        console_output_button = QPushButton('Console Output')
+        console_output_button.setDefault(True)
+        console_output_layout.addWidget(console_output_button)
+        console_output_box.setLayout(console_output_layout)
+
         local_files_box = QGroupBox('Local files')
         local_files_layout = QVBoxLayout()
-        local_files_console_output_button = QPushButton('Console Output')
-        local_files_console_output_button.setDefault(True)
         local_files_download_button = QPushButton('Download')
         local_files_download_button.setDefault(True)
-        local_files_layout.addWidget(local_files_console_output_button)
         local_files_layout.addWidget(local_files_download_button)
         local_files_box.setLayout(local_files_layout)
 
         layout = QVBoxLayout()
         layout.addWidget(database_box)
+        layout.addWidget(console_output_box)
         layout.addWidget(local_files_box)
-        layout.addStretch(1)
         self.function_key_box.setLayout(layout)
+
+    def create_log_box(self):
+        """
+        Create log box.
+        """
+        # log_edit_widget = QWidget()
+        # log_edit_layout = QVBoxLayout()
+        # log_handler = Logger(log_edit_widget)
+        # logging.getLogger().addHandler(log_handler)
+        # log_edit_layout.setContentsMargins(5, 5, 10, 5)
+        # log_edit_layout.addWidget(self.log_edit)
+        # log_edit_widget.setLayout(log_edit_layout)
+        # self.log_box.setLayout(log_edit_layout)
+
+        # logTextBox = QPlainTextEditLogger(self.log_edit)
+        # # You can format what is printed to text box
+        # logTextBox.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+        # logging.getLogger().addHandler(logTextBox)
+        # # You can control the logging level
+        # logging.getLogger().setLevel(logging.DEBUG)
+        #
+        # self._button = QPushButton(self)
+        # self._button.setText('Test Me')
+        # layout = QVBoxLayout()
+        # # Add the new logging box widget to the layout
+        # layout.addWidget(logTextBox.widget)
+        # layout.addWidget(self._button)
+        # self.log_box.setLayout(layout)
 
     def create_bottom_right_group_box(self):
         """
@@ -183,26 +232,6 @@ class GAirGUI(QWidget):
         layout.addWidget(dial, 3, 1, 2, 1)
         layout.setRowStretch(5, 1)
         self.bottom_right_group_box.setLayout(layout)
-
-    def create_progress_bar(self):
-        """
-        Create progress bar.
-        """
-        self.progress_bar = QProgressBar()
-        self.progress_bar.setRange(0, 10000)
-        self.progress_bar.setValue(0)
-
-        timer = QTimer(self)
-        timer.timeout.connect(self.advance_progress_bar)
-        timer.start(1000)
-
-    def advance_progress_bar(self):
-        """
-        Advance progress bar.
-        """
-        current_value = self.progress_bar.value()
-        max_value = self.progress_bar.maximum()
-        self.progress_bar.setValue(int(current_value + (max_value - current_value) / 100))
 
     def _initialize_symbols_edit_widget(self):
         """
@@ -258,7 +287,7 @@ class GAirGUI(QWidget):
         """
         Symbols changed event process.
         """
-        print(self.symbols, type(self.symbols))
+        logging.info(self.symbols, type(self.symbols))
 
     def _event_update_database(self):
         """
@@ -271,7 +300,7 @@ class GAirGUI(QWidget):
                 target_date_range=target_date_range,
                 dump_mysql=True)
         else:
-            print('no valid target dates.')
+            logging.info('no valid target dates.')
 
     def _event_delete_database(self):
         """
