@@ -17,6 +17,7 @@ from PyQt5.QtWidgets import (
 from g_air.data.database_api import *
 from g_air.api import calculate_indicators_of_date_range
 from g_air.logger import GUILogger
+from g_air.const import OUTPUT_FIELDS
 
 
 TIME_FORMAT = 'yyyy-MM-dd'
@@ -39,7 +40,7 @@ class GAirGUI(QWidget):
 
         self.input_box = QGroupBox('INPUT')
         self.function_key_box = QGroupBox('FUNCTION KEYS')
-        self.log_box = QGroupBox('LOG CONSOLE')
+        self.log_box = QGroupBox('CONSOLE')
         self.create_input_box()
         self.create_function_key_box()
         self.create_log_box()
@@ -137,10 +138,11 @@ class GAirGUI(QWidget):
         database_layout.addWidget(database_delete_button)
         database_box.setLayout(database_layout)
 
-        console_output_box = QGroupBox('Console output')
+        console_output_box = QGroupBox('Console')
         console_output_layout = QVBoxLayout()
-        console_output_button = QPushButton('Console Output')
+        console_output_button = QPushButton('Output')
         console_output_button.setDefault(True)
+        console_output_button.clicked.connect(self._event_console_output)
         console_output_layout.addWidget(console_output_button)
         console_output_box.setLayout(console_output_layout)
 
@@ -164,6 +166,10 @@ class GAirGUI(QWidget):
         log_edit_widget = QWidget()
         log_edit_layout = QVBoxLayout()
         log_edit_layout.setContentsMargins(5, 5, 10, 5)
+        clear_button = QPushButton('Clear')
+        clear_button.setDefault(True)
+        clear_button.clicked.connect(self._event_clear_log)
+        log_edit_layout.addWidget(clear_button)
         log_edit_layout.addWidget(self.logger.widget)
         log_edit_widget.setLayout(log_edit_layout)
         self.log_box.setLayout(log_edit_layout)
@@ -206,27 +212,27 @@ class GAirGUI(QWidget):
 
     def _event_start_date_changed(self):
         """
-        Start Date changed event process.
+        Start Date changed.
         """
         if self.start_date > self.end_date:
             self.end_date_edit.setDate(self.start_date_edit.date())
 
     def _event_end_date_changed(self):
         """
-        End Date changed event process.
+        End Date changed.
         """
         if self.start_date > self.end_date:
             self.start_date_edit.setDate(self.end_date_edit.date())
 
     def _event_symbols_changed(self):
         """
-        Symbols changed event process.
+        Symbols changed.
         """
         self.logger.output('{}, {}'.format(self.symbols, type(self.symbols)))
 
     def _event_update_database(self):
         """
-        Update database event process.
+        Update database.
         """
         try:
             target_date_range = load_trading_days(start=self.start_date, end=self.end_date)
@@ -250,13 +256,49 @@ class GAirGUI(QWidget):
 
     def _event_delete_database(self):
         """
-        Delete database items event process.
+        Delete database items.
         """
         try:
             delete_items_(self.start_date, self.end_date, symbols=self.symbols)
             self.logger.output('[Delete] Database delete successfully.')
         except:
             self.logger.output('[Delete] Database delete failed.')
+
+    def _event_console_output(self):
+        """
+        Console output result.
+        """
+        try:
+            target_date_range = load_trading_days(start=self.start_date, end=self.end_date)
+        except:
+            self.logger.output('[Console output] {}'.format('Loading trading days failed.'))
+            self.logger.output(traceback.format_exc())
+            return
+
+        if target_date_range:
+            try:
+                result = list()
+                panel = calculate_indicators_of_date_range(
+                    symbols=self.symbols,
+                    target_date_range=target_date_range)
+                for indicator in panel:
+                    if indicator not in OUTPUT_FIELDS:
+                        continue
+                    result.append('{}'.format(indicator))
+                    result.append(panel[indicator].__str__())
+                    result.append('\n')
+                self.logger.output('[Console output] {}'.format('\n'.join(result)))
+            except:
+                self.logger.output('[Console output] Console output failed.')
+                self.logger.output(traceback.format_exc())
+        else:
+            self.logger.output('[Console output] No valid target dates.')
+
+    def _event_clear_log(self):
+        """
+        Clear log output.
+        """
+        self.logger.clear()
 
 
 if __name__ == '__main__':
