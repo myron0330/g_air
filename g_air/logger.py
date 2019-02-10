@@ -18,14 +18,15 @@ class GUILogger(object):
         self.widget = QPlainTextEdit(parent)
         self.widget.setReadOnly(True)
 
-    def output(self, message):
+    def output(self, message, prefix=''):
         """
         Output q logger.
 
         Args:
             message(string): raw input message.
+            prefix(string): message prefix.
         """
-        message = self.format(message)
+        message = self.format(message, prefix=prefix)
         self.widget.appendPlainText(message)
 
     def clear(self):
@@ -35,15 +36,16 @@ class GUILogger(object):
         self.widget.clear()
 
     @staticmethod
-    def format(message):
+    def format(message, prefix=''):
         """
         Format message.
 
         Args:
             message(string): raw input message.
+            prefix(string): message prefix.
 
         Returns:
             string: formatted message
         """
         current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        return '[{}]\n{}\n'.format(current_time, message)
+        return '[{}] {}\n{}\n'.format(current_time, prefix, message)

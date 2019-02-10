@@ -228,7 +228,7 @@ class GAirGUI(QWidget):
         """
         Symbols changed.
         """
-        self.logger.output('{}, {}'.format(self.symbols, type(self.symbols)))
+        return
 
     def _event_update_database(self):
         """
@@ -237,7 +237,7 @@ class GAirGUI(QWidget):
         try:
             target_date_range = load_trading_days(start=self.start_date, end=self.end_date)
         except:
-            self.logger.output('[Update] {}'.format('Loading trading days failed.'))
+            self.logger.output('{}'.format('Loading trading days failed.'), prefix='[Update]')
             self.logger.output(traceback.format_exc())
             return
 
@@ -247,12 +247,12 @@ class GAirGUI(QWidget):
                     symbols=self.symbols,
                     target_date_range=target_date_range,
                     dump_mysql=True)
-                self.logger.output('[Update] Database update successfully.')
+                self.logger.output('Database update successfully.', prefix='[Update]')
             except:
-                self.logger.output('[Update] Database update failed.')
+                self.logger.output('Database update failed.', prefix='[Update]')
                 self.logger.output(traceback.format_exc())
         else:
-            self.logger.output('[Update] No valid target dates.')
+            self.logger.output('No valid target dates.', prefix='[Update]')
 
     def _event_delete_database(self):
         """
@@ -260,9 +260,9 @@ class GAirGUI(QWidget):
         """
         try:
             delete_items_(self.start_date, self.end_date, symbols=self.symbols)
-            self.logger.output('[Delete] Database delete successfully.')
+            self.logger.output('Database delete successfully.', prefix='[Delete]')
         except:
-            self.logger.output('[Delete] Database delete failed.')
+            self.logger.output('Database delete failed.', prefix='[Delete]')
 
     def _event_console_output(self):
         """
@@ -271,7 +271,7 @@ class GAirGUI(QWidget):
         try:
             target_date_range = load_trading_days(start=self.start_date, end=self.end_date)
         except:
-            self.logger.output('[Console output] {}'.format('Loading trading days failed.'))
+            self.logger.output('{}'.format('Loading trading days failed.', prefix='[Console output]'))
             self.logger.output(traceback.format_exc())
             return
 
@@ -287,12 +287,12 @@ class GAirGUI(QWidget):
                     result.append('{}'.format(indicator))
                     result.append(panel[indicator].__str__())
                     result.append('\n')
-                self.logger.output('[Console output] {}'.format('\n'.join(result)))
+                self.logger.output('{}'.format('\n'.join(result)), prefix='[Console output]')
             except:
-                self.logger.output('[Console output] Console output failed.')
+                self.logger.output('Console output failed.', prefix='[Console output]')
                 self.logger.output(traceback.format_exc())
         else:
-            self.logger.output('[Console output] No valid target dates.')
+            self.logger.output('No valid target dates.', prefix='[Console output]')
 
     def _event_clear_log(self):
         """
