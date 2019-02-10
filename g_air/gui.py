@@ -7,13 +7,11 @@
 """
 import traceback
 from datetime import datetime
-from PyQt5.QtCore import QDateTime, Qt, QTimer, QDate
+from PyQt5.QtCore import QDate
 from PyQt5.QtWidgets import (
-    QApplication, QCheckBox, QComboBox, QDateTimeEdit, QCalendarWidget, QDateEdit,
-    QDial, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit,
-    QProgressBar, QPushButton, QRadioButton, QScrollBar, QSizePolicy,
-    QSlider, QSpinBox, QStyleFactory, QTableWidget, QTabWidget, QTextEdit,
-    QVBoxLayout, QWidget, QPlainTextEdit, QDialog)
+    QApplication, QCheckBox, QDateEdit, QGridLayout, QGroupBox, QLabel,
+    QProgressBar, QPushButton, QSizePolicy, QStyleFactory, QTabWidget,
+    QTextEdit, QVBoxLayout, QWidget, QDialog)
 from g_air.data.database_api import *
 from g_air.api import calculate_indicators_of_date_range
 from g_air.logger import GUILogger
