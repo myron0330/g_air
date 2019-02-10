@@ -148,6 +148,7 @@ class GAirGUI(QWidget):
         local_files_layout = QVBoxLayout()
         local_files_download_button = QPushButton('Download')
         local_files_download_button.setDefault(True)
+        local_files_download_button.clicked.connect(self._event_download)
         local_files_layout.addWidget(local_files_download_button)
         local_files_box.setLayout(local_files_layout)
 
@@ -232,10 +233,11 @@ class GAirGUI(QWidget):
         """
         Update database.
         """
+        prefix = '[Update]'
         try:
             target_date_range = load_trading_days(start=self.start_date, end=self.end_date)
         except:
-            self.logger.output('{}'.format('Loading trading days failed.'), prefix='[Update]')
+            self.logger.output('{}'.format('Loading trading days failed.'), prefix=prefix)
             self.logger.output(traceback.format_exc())
             return
 
@@ -245,31 +247,34 @@ class GAirGUI(QWidget):
                     symbols=self.symbols,
                     target_date_range=target_date_range,
                     dump_mysql=True)
-                self.logger.output('Database update successfully.', prefix='[Update]')
+                self.logger.output('Database update successfully.', prefix=prefix)
             except:
-                self.logger.output('Database update failed.', prefix='[Update]')
+                self.logger.output('Database update failed.', prefix=prefix)
                 self.logger.output(traceback.format_exc())
         else:
-            self.logger.output('No valid target dates.', prefix='[Update]')
+            self.logger.output('No valid target dates.', prefix=prefix)
 
     def _event_delete_database(self):
         """
         Delete database items.
         """
+        prefix = '[Delete]'
         try:
             delete_items_(self.start_date, self.end_date, symbols=self.symbols)
-            self.logger.output('Database delete successfully.', prefix='[Delete]')
+            self.logger.output('Database delete successfully.', prefix=prefix)
         except:
-            self.logger.output('Database delete failed.', prefix='[Delete]')
+            self.logger.output('Database delete failed.', prefix=prefix)
 
     def _event_console_output(self):
         """
         Console output result.
         """
+        prefix = '[Console output]'
+
         try:
             target_date_range = load_trading_days(start=self.start_date, end=self.end_date)
         except:
-            self.logger.output('{}'.format('Loading trading days failed.', prefix='[Console output]'))
+            self.logger.output('{}'.format('Loading trading days failed.', prefix=prefix))
             self.logger.output(traceback.format_exc())
             return
 
@@ -285,12 +290,40 @@ class GAirGUI(QWidget):
                     result.append('{}'.format(indicator))
                     result.append(panel[indicator].__str__())
                     result.append('\n')
-                self.logger.output('{}'.format('\n'.join(result)), prefix='[Console output]')
+                self.logger.output('{}'.format('\n'.join(result)), prefix=prefix)
             except:
-                self.logger.output('Console output failed.', prefix='[Console output]')
+                self.logger.output('Console output failed.', prefix=prefix)
                 self.logger.output(traceback.format_exc())
         else:
-            self.logger.output('No valid target dates.', prefix='[Console output]')
+            self.logger.output('No valid target dates.', prefix=prefix)
+
+    def _event_download(self):
+        """
+        Download local files.
+        """
+        prefix = '[Download]'
+
+        try:
+            target_date_range = load_trading_days(start=self.start_date, end=self.end_date)
+        except:
+            self.logger.output('{}'.format('Loading trading days failed.', prefix=prefix))
+            self.logger.output(traceback.format_exc())
+            return
+
+        if target_date_range:
+            try:
+                calculate_indicators_of_date_range(
+                    symbols=self.symbols,
+                    target_date_range=target_date_range,
+                    dump_excel=True,
+                    excel_name='symbol',
+                )
+                self.logger.output('Download local files successfully.', prefix=prefix)
+            except:
+                self.logger.output('Download local files failed.', prefix=prefix)
+                self.logger.output(traceback.format_exc())
+        else:
+            self.logger.output('No valid target dates.', prefix=prefix)
 
     def _event_clear_log(self):
         """
