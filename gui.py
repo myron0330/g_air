@@ -12,7 +12,7 @@ from PyQt5.QtCore import QDate
 from PyQt5.QtWidgets import (
     QApplication, QCheckBox, QDateEdit, QGridLayout, QGroupBox, QLabel,
     QProgressBar, QPushButton, QSizePolicy, QStyleFactory, QTabWidget,
-    QTextEdit, QVBoxLayout, QWidget, QDialog)
+    QTextEdit, QVBoxLayout, QWidget, QDialog, QLineEdit)
 from g_air.data.database_api import *
 from g_air.api import calculate_indicators_of_date_range
 from g_air.logger import GUILogger
@@ -34,6 +34,7 @@ class GAirGUI(QWidget):
         self.end_date_edit = QDateEdit()
         self.symbols_edit = QTextEdit()
         self.symbols_widget = QTabWidget()
+        self.download_path_edit = QLineEdit()
         self.log_widget = QDialog()
         self.logger = GUILogger(self.log_widget)
         self.progress_bar = QProgressBar()
@@ -84,6 +85,13 @@ class GAirGUI(QWidget):
             return list(filter(lambda x: x is not '', map(lambda x: x.strip(), text.split(','))))
         else:
             return None
+
+    @property
+    def download_path(self):
+        """
+        Download path.
+        """
+        return self.download_path_edit.text()
 
     @staticmethod
     def change_style(style_name='Fusion'):
@@ -151,6 +159,11 @@ class GAirGUI(QWidget):
         local_files_download_button = QPushButton('Download')
         local_files_download_button.setDefault(True)
         local_files_download_button.clicked.connect(self._event_download)
+        # self.download_path_edit.setPlainText('000001.SZ, 600000.SH')
+        download_path_label = QLabel('Target path')
+        self.download_path_edit.setText(current_path)
+        local_files_layout.addWidget(download_path_label)
+        local_files_layout.addWidget(self.download_path_edit)
         local_files_layout.addWidget(local_files_download_button)
         local_files_box.setLayout(local_files_layout)
 
@@ -319,7 +332,7 @@ class GAirGUI(QWidget):
                     target_date_range=target_date_range,
                     dump_excel=True,
                     excel_name='symbol',
-                    current_path=current_path,
+                    current_path=self.download_path,
                 )
                 self.logger.output('Download local files successfully.', prefix=prefix)
             except:
