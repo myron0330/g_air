@@ -5,6 +5,7 @@
 #   Author: Myron
 # **********************************************************************************#
 """
+import os
 import traceback
 from datetime import datetime
 from PyQt5.QtCore import QDate
@@ -20,6 +21,7 @@ from g_air.const import OUTPUT_FIELDS
 
 TIME_FORMAT = 'yyyy-MM-dd'
 ALL_SYMBOLS = 'All'
+current_path = os.path.abspath(os.path.dirname(__file__))
 
 
 class GAirGUI(QWidget):
@@ -317,6 +319,7 @@ class GAirGUI(QWidget):
                     target_date_range=target_date_range,
                     dump_excel=True,
                     excel_name='symbol',
+                    current_path=current_path,
                 )
                 self.logger.output('Download local files successfully.', prefix=prefix)
             except:

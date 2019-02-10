@@ -21,6 +21,7 @@ from .const import (
     MAX_SYMBOLS_FRAGMENT,
     OUTPUT_FIELDS
 )
+from . import current_path
 
 
 def output(func):
@@ -46,24 +47,28 @@ def output(func):
             args_arguments = dict(zip(arguments_list[:len(args)], args))
             arguments.update(args_arguments)
         if arguments.get('dump_excel', False):
+            path = arguments.get('current_path', current_path)
             excel_name = arguments.get('excel_name', '{}.xlsx'.format(func.__name__))
             if excel_name == 'symbol':
                 output_panel = panel.swapaxes(0, 2)
                 for symbol in output_panel:
                     excel_name = '{}.xlsx'.format(symbol)
-                    output_panel[symbol][OUTPUT_FIELDS].T.to_excel(excel_name, encoding='gbk')
+                    excel_path = '/'.join([path, excel_name])
+                    output_panel[symbol][OUTPUT_FIELDS].T.to_excel(excel_path, encoding='gbk')
             elif excel_name == 'target_date':
                 output_panel = panel.swapaxes(0, 1)
                 for target_date in output_panel:
                     excel_name = '{}.xlsx'.format(target_date)
-                    output_panel[target_date].loc[OUTPUT_FIELDS, :].to_excel(excel_name, encoding='gbk')
+                    excel_path = '/'.join([path, excel_name])
+                    output_panel[target_date].loc[OUTPUT_FIELDS, :].to_excel(excel_path, encoding='gbk')
             elif excel_name == 'indicator':
                 output_panel = panel
                 for indicator in output_panel:
                     if indicator not in OUTPUT_FIELDS:
                         continue
                     excel_name = '{}.xlsx'.format(indicator)
-                    output_panel[indicator].to_excel(excel_name, encoding='gbk')
+                    excel_path = '/'.join([path, excel_name])
+                    output_panel[indicator].to_excel(excel_path, encoding='gbk')
             else:
                 panel.to_excel(excel_name, encoding='gbk')
         if arguments.get('dump_mysql', False):
