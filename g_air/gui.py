@@ -5,7 +5,7 @@
 #   Author: Myron
 # **********************************************************************************#
 """
-import logging
+import traceback
 from datetime import datetime
 from PyQt5.QtCore import QDateTime, Qt, QTimer, QDate
 from PyQt5.QtWidgets import (
@@ -16,24 +16,11 @@ from PyQt5.QtWidgets import (
     QVBoxLayout, QWidget, QPlainTextEdit, QDialog)
 from g_air.data.database_api import *
 from g_air.api import calculate_indicators_of_date_range
+from g_air.logger import GUILogger
 
 
 TIME_FORMAT = 'yyyy-MM-dd'
 ALL_SYMBOLS = 'All'
-
-
-class QPlainTextEditLogger(logging.Handler):
-    """
-    QPlainTextEditLogger.
-    """
-    def __init__(self, parent):
-        super(QPlainTextEditLogger, self).__init__(parent)
-        self.widget = QPlainTextEdit(parent)
-        self.widget.setReadOnly(True)
-
-    def emit(self, record):
-        msg = self.format(record)
-        self.widget.appendPlainText(msg)
 
 
 class GAirGUI(QWidget):
@@ -46,7 +33,8 @@ class GAirGUI(QWidget):
         self.end_date_edit = QDateEdit()
         self.symbols_edit = QTextEdit()
         self.symbols_widget = QTabWidget()
-        self.log_edit = QDialog()
+        self.log_widget = QDialog()
+        self.logger = GUILogger(self.log_widget)
         self.progress_bar = QProgressBar()
 
         self.input_box = QGroupBox('INPUT')
@@ -173,65 +161,12 @@ class GAirGUI(QWidget):
         """
         Create log box.
         """
-        # log_edit_widget = QWidget()
-        # log_edit_layout = QVBoxLayout()
-        # log_handler = Logger(log_edit_widget)
-        # logging.getLogger().addHandler(log_handler)
-        # log_edit_layout.setContentsMargins(5, 5, 10, 5)
-        # log_edit_layout.addWidget(self.log_edit)
-        # log_edit_widget.setLayout(log_edit_layout)
-        # self.log_box.setLayout(log_edit_layout)
-
-        # logTextBox = QPlainTextEditLogger(self.log_edit)
-        # # You can format what is printed to text box
-        # logTextBox.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
-        # logging.getLogger().addHandler(logTextBox)
-        # # You can control the logging level
-        # logging.getLogger().setLevel(logging.DEBUG)
-        #
-        # self._button = QPushButton(self)
-        # self._button.setText('Test Me')
-        # layout = QVBoxLayout()
-        # # Add the new logging box widget to the layout
-        # layout.addWidget(logTextBox.widget)
-        # layout.addWidget(self._button)
-        # self.log_box.setLayout(layout)
-
-    def create_bottom_right_group_box(self):
-        """
-        Create bottom right group box.
-        """
-        self.bottom_right_group_box.setCheckable(True)
-        self.bottom_right_group_box.setChecked(True)
-
-        line_edit = QLineEdit('s3cRe7')
-        line_edit.setEchoMode(QLineEdit.Password)
-
-        spin_box = QSpinBox(self.bottom_right_group_box)
-        spin_box.setValue(50)
-
-        date_time_edit = QDateTimeEdit(self.bottom_right_group_box)
-        date_time_edit.setDateTime(QDateTime.currentDateTime())
-
-        slider = QSlider(Qt.Horizontal, self.bottom_right_group_box)
-        slider.setValue(40)
-
-        scroll_bar = QScrollBar(Qt.Horizontal, self.bottom_right_group_box)
-        scroll_bar.setValue(60)
-
-        dial = QDial(self.bottom_right_group_box)
-        dial.setValue(30)
-        dial.setNotchesVisible(True)
-
-        layout = QGridLayout()
-        layout.addWidget(line_edit, 0, 0, 1, 2)
-        layout.addWidget(spin_box, 1, 0, 1, 2)
-        layout.addWidget(date_time_edit, 2, 0, 1, 2)
-        layout.addWidget(slider, 3, 0)
-        layout.addWidget(scroll_bar, 4, 0)
-        layout.addWidget(dial, 3, 1, 2, 1)
-        layout.setRowStretch(5, 1)
-        self.bottom_right_group_box.setLayout(layout)
+        log_edit_widget = QWidget()
+        log_edit_layout = QVBoxLayout()
+        log_edit_layout.setContentsMargins(5, 5, 10, 5)
+        log_edit_layout.addWidget(self.logger.widget)
+        log_edit_widget.setLayout(log_edit_layout)
+        self.log_box.setLayout(log_edit_layout)
 
     def _initialize_symbols_edit_widget(self):
         """
@@ -287,26 +222,41 @@ class GAirGUI(QWidget):
         """
         Symbols changed event process.
         """
-        logging.info(self.symbols, type(self.symbols))
+        self.logger.output('{}, {}'.format(self.symbols, type(self.symbols)))
 
     def _event_update_database(self):
         """
         Update database event process.
         """
-        target_date_range = load_trading_days(start=self.start_date, end=self.end_date)
+        try:
+            target_date_range = load_trading_days(start=self.start_date, end=self.end_date)
+        except:
+            self.logger.output('[Update] {}'.format('Loading trading days failed.'))
+            self.logger.output(traceback.format_exc())
+            return
+
         if target_date_range:
-            calculate_indicators_of_date_range(
-                symbols=self.symbols,
-                target_date_range=target_date_range,
-                dump_mysql=True)
+            try:
+                calculate_indicators_of_date_range(
+                    symbols=self.symbols,
+                    target_date_range=target_date_range,
+                    dump_mysql=True)
+                self.logger.output('[Update] Database update successfully.')
+            except:
+                self.logger.output('[Update] Database update failed.')
+                self.logger.output(traceback.format_exc())
         else:
-            logging.info('no valid target dates.')
+            self.logger.output('[Update] No valid target dates.')
 
     def _event_delete_database(self):
         """
         Delete database items event process.
         """
-        delete_items_(self.start_date, self.end_date, symbols=self.symbols)
+        try:
+            delete_items_(self.start_date, self.end_date, symbols=self.symbols)
+            self.logger.output('[Delete] Database delete successfully.')
+        except:
+            self.logger.output('[Delete] Database delete failed.')
 
 
 if __name__ == '__main__':
