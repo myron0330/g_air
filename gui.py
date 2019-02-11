@@ -35,11 +35,13 @@ class GAirGUI(QWidget):
         self.start_date_edit = QDateEdit()
         self.end_date_edit = QDateEdit()
         self.symbols_edit = QTextEdit()
+        self.full_stock_check_box = QCheckBox(ALL_SYMBOLS)
+        self.hs300_check_box = QCheckBox(HS300)
+        self.zz500_check_box = QCheckBox(ZZ500)
         self.symbols_widget = QTabWidget()
         self.download_path_edit = QLineEdit()
         self.log_widget = QDialog()
         self.logger = GUILogger(self.log_widget)
-        self.progress_bar = QProgressBar()
 
         self.input_box = QGroupBox('INPUT')
         self.function_key_box = QGroupBox('FUNCTION KEYS')
@@ -83,10 +85,21 @@ class GAirGUI(QWidget):
         Symbols.
         """
         text = self.symbols_edit.document().toPlainText()
+        all_is_checked = self.full_stock_check_box.isChecked()
+        hs300_is_checked = self.hs300_check_box.isChecked()
+        zz500_is_checked = self.zz500_check_box.isChecked()
+
         if self.symbols_edit.isEnabled():
             return list(filter(lambda x: x is not '', map(lambda x: x.strip(), text.split(','))))
         else:
-            return None
+            if all_is_checked:
+                return None
+            symbols = list()
+            if hs300_is_checked:
+                symbols.extend(load_hs300())
+            if zz500_is_checked:
+                symbols.extend(load_zz500())
+            return symbols
 
     @property
     def download_path(self):
@@ -161,7 +174,6 @@ class GAirGUI(QWidget):
         local_files_download_button = QPushButton('Download')
         local_files_download_button.setDefault(True)
         local_files_download_button.clicked.connect(self._event_download)
-        # self.download_path_edit.setPlainText('000001.SZ, 600000.SH')
         download_path_label = QLabel('Target path')
         self.download_path_edit.setText(current_path)
         local_files_layout.addWidget(download_path_label)
@@ -197,14 +209,18 @@ class GAirGUI(QWidget):
         self.symbols_widget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Ignored)
         symbols_edit = QWidget()
         self.symbols_edit.setPlainText('000001.SZ, 600000.SH')
-        self.symbols_edit.textChanged.connect(self._event_symbols_changed)
-        full_stock_check_box = QCheckBox(ALL_SYMBOLS)
-        full_stock_check_box.toggled.connect(self.symbols_edit.setDisabled)
-        full_stock_check_box.toggled.connect(self._event_symbols_changed)
-        symbols_edit_layout = QVBoxLayout()
+        self.symbols_edit.textChanged.connect(self._event_toggled)
+
+        self.full_stock_check_box.toggled.connect(self._event_toggled)
+        self.hs300_check_box.toggled.connect(self._event_toggled)
+        self.zz500_check_box.toggled.connect(self._event_toggled)
+
+        symbols_edit_layout = QGridLayout()
         symbols_edit_layout.setContentsMargins(5, 5, 5, 5)
-        symbols_edit_layout.addWidget(full_stock_check_box)
-        symbols_edit_layout.addWidget(self.symbols_edit)
+        symbols_edit_layout.addWidget(self.full_stock_check_box, 0, 0, 1, 1)
+        symbols_edit_layout.addWidget(self.hs300_check_box, 0, 1, 1, 1)
+        symbols_edit_layout.addWidget(self.zz500_check_box, 0, 2, 1, 1)
+        symbols_edit_layout.addWidget(self.symbols_edit, 1, 0, 4, 5)
         symbols_edit.setLayout(symbols_edit_layout)
         self.symbols_widget.addTab(symbols_edit, 'Edit Text')
 
@@ -240,11 +256,17 @@ class GAirGUI(QWidget):
         if self.start_date > self.end_date:
             self.start_date_edit.setDate(self.end_date_edit.date())
 
-    def _event_symbols_changed(self):
+    def _event_toggled(self):
         """
         Symbols changed.
         """
-        return
+        all_is_checked = self.full_stock_check_box.isChecked()
+        hs300_is_checked = self.hs300_check_box.isChecked()
+        zz500_is_checked = self.zz500_check_box.isChecked()
+        if all_is_checked or hs300_is_checked or zz500_is_checked:
+            self.symbols_edit.setDisabled(True)
+        else:
+            self.symbols_edit.setDisabled(False)
 
     def _event_update_database(self):
         """
