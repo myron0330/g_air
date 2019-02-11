@@ -5,6 +5,7 @@
 #   Author: Myron
 # **********************************************************************************#
 """
+import os
 import inspect
 import multiprocessing
 import numpy as np
@@ -53,13 +54,13 @@ def output(func):
                 output_panel = panel.swapaxes(0, 2)
                 for symbol in output_panel:
                     excel_name = '{}.xlsx'.format(symbol)
-                    excel_path = '/'.join([path, excel_name])
+                    excel_path = os.path.join(path, excel_name)
                     output_panel[symbol][OUTPUT_FIELDS].T.to_excel(excel_path, encoding='gbk')
             elif excel_name == 'target_date':
                 output_panel = panel.swapaxes(0, 1)
                 for target_date in output_panel:
                     excel_name = '{}.xlsx'.format(target_date)
-                    excel_path = '/'.join([path, excel_name])
+                    excel_path = os.path.join(path, excel_name)
                     output_panel[target_date].loc[OUTPUT_FIELDS, :].to_excel(excel_path, encoding='gbk')
             elif excel_name == 'indicator':
                 output_panel = panel
@@ -67,7 +68,7 @@ def output(func):
                     if indicator not in OUTPUT_FIELDS:
                         continue
                     excel_name = '{}.xlsx'.format(indicator)
-                    excel_path = '/'.join([path, excel_name])
+                    excel_path = os.path.join(path, excel_name)
                     output_panel[indicator].to_excel(excel_path, encoding='gbk')
             else:
                 panel.to_excel(excel_name, encoding='gbk')
