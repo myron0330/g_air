@@ -21,6 +21,8 @@ from g_air.const import OUTPUT_FIELDS
 
 TIME_FORMAT = 'yyyy-MM-dd'
 ALL_SYMBOLS = 'All'
+HS300 = 'HS300'
+ZZ500 = 'ZZ500'
 current_path = os.path.abspath(os.path.dirname(__file__))
 
 

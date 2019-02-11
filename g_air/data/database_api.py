@@ -43,6 +43,28 @@ def load_symbols_name_map():
     return result
 
 
+def load_hs300():
+    """
+    Load HS300.
+    """
+    with get_connection().cursor() as cursor:
+        sql = """select distinct 代码 from hs_300"""
+        cursor.execute(sql)
+        result = list(map(lambda x: x[0], cursor.fetchall()))
+    return result
+
+
+def load_zz500():
+    """
+    Load ZZ500.
+    """
+    with get_connection().cursor() as cursor:
+        sql = """select distinct 代码 from zz_500"""
+        cursor.execute(sql)
+        result = list(map(lambda x: x[0], cursor.fetchall()))
+    return result
+
+
 def load_trading_days(start=None, end=None):
     """
     Load trading days from cadd table.
@@ -309,6 +331,8 @@ __all__ = [
     'load_attribute',
     'load_attributes_data',
     'load_symbols_name_map',
+    'load_hs300',
+    'load_zz500',
     'get_all_tables',
     'create_tables',
     'update_table',

@@ -109,3 +109,19 @@ class TestDatabaseAPI(TestCase):
         # indicators = ['wz']
         indicators = None
         delete_items_(start_date, end_date, symbols=symbols, indicators=indicators)
+
+    def test_load_hs300(self):
+        """
+        Test load HS300.
+        """
+        data = load_hs300()
+        self.assertAlmostEqual(len(data), 300)
+        print(data)
+
+    def test_load_zz500(self):
+        """
+        Test load ZZ500.
+        """
+        data = load_zz500()
+        self.assertAlmostEqual(len(data), 500)
+        print(data)
