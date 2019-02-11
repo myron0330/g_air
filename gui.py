@@ -11,7 +11,7 @@ from datetime import datetime
 from PyQt5.QtCore import QDate
 from PyQt5.QtWidgets import (
     QApplication, QCheckBox, QDateEdit, QGridLayout, QGroupBox, QLabel,
-    QProgressBar, QPushButton, QSizePolicy, QStyleFactory, QTabWidget,
+    QPushButton, QSizePolicy, QStyleFactory, QTabWidget,
     QTextEdit, QVBoxLayout, QWidget, QDialog, QLineEdit)
 from g_air.data.database_api import *
 from g_air.api import calculate_indicators_of_date_range
