@@ -23,7 +23,7 @@ from ..const import MAX_SINGLE_FACTOR_PERIODS
 
 def load_all_symbols():
     """
-    Load all symbols from cadd table.
+    Load all symbols from price table.
     """
     with get_connection().cursor() as cursor:
         sql = """select distinct 代码 from price"""
@@ -34,7 +34,7 @@ def load_all_symbols():
 
 def load_symbols_name_map():
     """
-    Load all symbols from cadd table.
+    Load all symbols from price table.
     """
     with get_connection().cursor() as cursor:
         sql = """select distinct 代码,简称 from price"""
