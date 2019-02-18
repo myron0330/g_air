@@ -23,6 +23,7 @@ TIME_FORMAT = 'yyyy-MM-dd'
 ALL_SYMBOLS = 'All'
 HS300 = 'HS300'
 ZZ500 = 'ZZ500'
+SHARES = 'SHARES'
 current_path = os.path.abspath(os.path.dirname(__file__))
 
 
@@ -38,6 +39,7 @@ class GAirGUI(QWidget):
         self.full_stock_check_box = QCheckBox(ALL_SYMBOLS)
         self.hs300_check_box = QCheckBox(HS300)
         self.zz500_check_box = QCheckBox(ZZ500)
+        self.shares_check_box = QCheckBox(SHARES)
         self.symbols_widget = QTabWidget()
         self.download_path_edit = QLineEdit()
         self.log_widget = QDialog()
@@ -88,6 +90,7 @@ class GAirGUI(QWidget):
         all_is_checked = self.full_stock_check_box.isChecked()
         hs300_is_checked = self.hs300_check_box.isChecked()
         zz500_is_checked = self.zz500_check_box.isChecked()
+        shares_is_checked = self.shares_check_box.isChecked()
 
         if self.symbols_edit.isEnabled():
             return list(filter(lambda x: x is not '', map(lambda x: x.strip(), text.split(','))))
@@ -99,6 +102,8 @@ class GAirGUI(QWidget):
                 symbols.extend(load_hs300())
             if zz500_is_checked:
                 symbols.extend(load_zz500())
+            if shares_is_checked:
+                symbols.extend(load_shares())
             return symbols
 
     @property
@@ -214,12 +219,14 @@ class GAirGUI(QWidget):
         self.full_stock_check_box.toggled.connect(self._event_toggled)
         self.hs300_check_box.toggled.connect(self._event_toggled)
         self.zz500_check_box.toggled.connect(self._event_toggled)
+        self.shares_check_box.toggled.connect(self._event_toggled)
 
         symbols_edit_layout = QGridLayout()
         symbols_edit_layout.setContentsMargins(5, 5, 5, 5)
         symbols_edit_layout.addWidget(self.full_stock_check_box, 0, 0, 1, 1)
         symbols_edit_layout.addWidget(self.hs300_check_box, 0, 1, 1, 1)
         symbols_edit_layout.addWidget(self.zz500_check_box, 0, 2, 1, 1)
+        symbols_edit_layout.addWidget(self.shares_check_box, 0, 3, 1, 1)
         symbols_edit_layout.addWidget(self.symbols_edit, 1, 0, 4, 5)
         symbols_edit.setLayout(symbols_edit_layout)
         self.symbols_widget.addTab(symbols_edit, 'Edit Text')
@@ -263,7 +270,8 @@ class GAirGUI(QWidget):
         all_is_checked = self.full_stock_check_box.isChecked()
         hs300_is_checked = self.hs300_check_box.isChecked()
         zz500_is_checked = self.zz500_check_box.isChecked()
-        if all_is_checked or hs300_is_checked or zz500_is_checked:
+        shares_is_checked = self.shares_check_box.isChecked()
+        if all_is_checked or hs300_is_checked or zz500_is_checked or shares_is_checked:
             self.symbols_edit.setDisabled(True)
         else:
             self.symbols_edit.setDisabled(False)

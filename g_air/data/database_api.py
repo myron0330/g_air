@@ -65,6 +65,17 @@ def load_zz500():
     return result
 
 
+def load_shares():
+    """
+    Load shares.
+    """
+    with get_connection().cursor() as cursor:
+        sql = """select distinct 代码 from zx_shares"""
+        cursor.execute(sql)
+        result = list(map(lambda x: x[0], cursor.fetchall()))
+    return result
+
+
 def load_trading_days(start=None, end=None):
     """
     Load trading days from cadd table.
@@ -333,6 +344,7 @@ __all__ = [
     'load_symbols_name_map',
     'load_hs300',
     'load_zz500',
+    'load_shares',
     'get_all_tables',
     'create_tables',
     'update_table',

@@ -125,3 +125,10 @@ class TestDatabaseAPI(TestCase):
         data = load_zz500()
         self.assertAlmostEqual(len(data), 500)
         print(data)
+
+    def test_load_shares(self):
+        """
+        Test load SHARES.
+        """
+        data = load_shares()
+        print(data)
