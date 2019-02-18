@@ -52,10 +52,13 @@ def output(func):
             excel_name = arguments.get('excel_name', '{}.xlsx'.format(func.__name__))
             if excel_name == 'symbol':
                 output_panel = panel.swapaxes(0, 2)
+                symbols_name_map = load_symbols_name_map()
                 for symbol in output_panel:
-                    excel_name = '{}.xlsx'.format(symbol)
+                    excel_name = '{}-{}.xlsx'.format(symbol, symbols_name_map.get(symbol, symbol))
                     excel_path = os.path.join(path, excel_name)
-                    output_panel[symbol][OUTPUT_FIELDS].T.to_excel(excel_path, encoding='gbk')
+                    frame = output_panel[symbol][OUTPUT_FIELDS].T
+                    frame = frame[sorted(frame.columns, reverse=True)]
+                    frame.to_excel(excel_path, encoding='gbk')
             elif excel_name == 'target_date':
                 output_panel = panel.swapaxes(0, 1)
                 for target_date in output_panel:
